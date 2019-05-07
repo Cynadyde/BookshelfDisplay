@@ -1,0 +1,85 @@
+
+# If there's a single book in a frame attached to the bookshelf,
+# automatically open that book instead of showing the GUI.
+#
+auto-view: true
+
+# The default GUI is shown if there are no containers with
+# custom names in the item frames attached to a bookshelf.
+#
+# default-small: < 15 books
+# default-medium: < 31 books
+# default-large: >= 31 books
+#
+default-gui:
+  0: default-small
+  15: default-medium
+  31: default-large
+
+# If a container has a custom name that matches one of these,
+# use that GUI template rather than a directory view.
+#
+# *** FEEL FREE TO ADD YOUR OWN CUSTOM TEMPLATES HERE ***
+#
+gui-templates:
+
+  default-small:
+    pattern: >
+      .|-----|.
+      .|+++++|.
+      .|.....|.
+    key:
+      '.': minecraft:black_stained_glass_pane
+      '|': minecraft:blue_stained_glass_pane
+      '-': minecraft:red_stained_glass_pane
+      '+': minecraft:purple_stained_glass_pane
+    prev-button: 10
+    next-button: 16
+    content: [11, 12, 13, 14, 15]
+
+  default-medium:
+    pattern: >
+      .|-----|.
+      .|.+++.|.
+      .|+++++|.
+      .|+++++|.
+      .|.....|.
+    key:
+      '.': minecraft:black_stained_glass_pane
+      '|': minecraft:blue_stained_glass_pane
+      '-': minecraft:red_stained_glass_pane
+      '+': minecraft:purple_stained_glass_pane
+    prev-button: 19
+    next-button: 25
+    content: [12, 13, 14, 20, 21, 22, 23, 24, 29, 30, 31, 32, 33]
+
+  default-large:
+    pattern: >
+      .|-----|.
+      .|.+++.|.
+      .|+++++|.
+      .|+++++|.
+      .|+++++|.
+      .|+++++|.
+      .|+++++|.
+      .|.+++.|.
+      .|.....|.
+    key:
+      '.': minecraft:black_stained_glass_pane
+      '|': minecraft:blue_stained_glass_pane
+      '-': minecraft:red_stained_glass_pane
+      '+': minecraft:purple_stained_glass_pane
+    prev-button: 37
+    next-button: 43
+    content: [12, 13, 14, 20, 21, 22, 23, 24, 29, 30, 31, 32, 33, 38, 39, 40, 41, 42, 47, 48, 49, 50, 51, 56, 57, 58, 59, 60, 66, 67, 68]
+
+  oak-tiny:
+    pattern: >
+      -#=====#-
+    key:
+      '-': minecraft:oak_planks
+      '#': minecraft:oak_log
+      '=': minecraft:gray_stained_glass_pane
+      prev-button: 1
+      next-button: 7
+      content: [2, 3, 4, 5, 6]

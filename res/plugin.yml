@@ -1,0 +1,30 @@
+main: me.Cynadyde.bookshelves.BookShelvesPlugin
+name: BookShelves
+version: 0.0.0
+api-version: 1.14
+description: >
+  Remotely view books through bookshelf blocks! Simply attach an item
+  frame with either a book or a container of books to the bookshelf.
+website: null
+authors:
+  - Cynadyde (May 2019)
+depend:
+  - ProtocolLib
+commands:
+  "bookshelves reloadconfig":
+    usage: "/bookshelves reloadconfig"
+    description: "Reloads the plugin config file."
+    permission: bookshelves.admin
+permissions:
+  bookshelves.*:
+    description: "Grants all plugin abilities."
+    default: op
+    children:
+      bookshelves.admin: true
+      bookshelves.player: true
+  bookshelves.admin:
+    description: "Grants the ability to reload the plugin's config."
+    default: false
+  bookshelves.player:
+    description: "Grants the ability to interact with bookshelves."
+    default: true
