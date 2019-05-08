@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -60,7 +61,8 @@ class Utils {
         }
         catch (Exception ex) {
 
-            Bukkit.getLogger().warning(String.format("Unable to open book for %s\n%s", player.getName(), ex));
+            Bukkit.getLogger().warning(String.format("Unable to open book for %s: %s\n%s\n%s",
+                    player.getName(), ex, ex.getCause(), Arrays.toString(ex.getStackTrace())));
         }
 
         player.getInventory().setItem(slot, old);
@@ -134,7 +136,10 @@ class Utils {
                 // Get the first item-frame attached to the block...
                 if (entity.getType().equals(EntityType.ITEM_FRAME)) {
                     ItemFrame itemFrame = (ItemFrame) entity;
-                    if (itemFrame.getFacing().equals(direction)) {
+
+                    Bukkit.getLogger().info(Utils.format("found item frame attached to bookshelf!"));
+
+                    if (itemFrame.getFacing().equals(direction.getOppositeFace())) {
 
                         // If the contained item is a container, return it...
                         ItemStack item = itemFrame.getItem();

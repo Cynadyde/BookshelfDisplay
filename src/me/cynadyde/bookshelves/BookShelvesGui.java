@@ -131,19 +131,13 @@ public class BookShelvesGui {
         return Collections.unmodifiableList(path);
     }
 
-    /**
-     * Calls an inventory close event to get this gui shut down...
-     */
-    public void close() {
-
-        InventoryCloseEvent event = new InventoryCloseEvent(owner.getOpenInventory());
-        Bukkit.getPluginManager().callEvent(event);
-    }
-
-    public void onInteract(@NotNull HumanEntity who, @Nullable Inventory inv, int slot, @NotNull ClickType click, @Nullable ItemStack cursor) {
+    public void onInteract(@NotNull HumanEntity who, @Nullable Inventory inv, int slot, @NotNull ClickType click, @NotNull ItemStack cursor) {
 
         // Click outside of the inventory gui to go up a directory...
         if (inv == null) {
+
+            Bukkit.getLogger().info(Utils.format("Inv is null. going up a dir..."));
+
             if (path.size() > 1) {
                 path.remove(path.size() - 1);
                 updateDisplay();
@@ -152,31 +146,53 @@ public class BookShelvesGui {
         // Inside the inventory gui...
         else if (inventory.equals(inv)) {
 
+            Bukkit.getLogger().info(Utils.format("Inv matches gui!"));
+            Bukkit.getLogger().info(Utils.format("click: %s cursor: %s", click, cursor));
+
             // Left click with an empty cursor...
-            if (click.isLeftClick() && cursor == null) {
+            if (click.isLeftClick() && cursor.getType().equals(Material.AIR)) {
+
+                Bukkit.getLogger().info(Utils.format("Left clicking with empty cursor..."));
 
                 ItemStack clicked = inventory.getItem(slot);
                 if (clicked != null) {
 
+                    Bukkit.getLogger().info(Utils.format("Clicked item was not null..."));
+
                     // If the item is a book, close the Gui and open the book...
                     if (clicked.getType().equals(Material.WRITTEN_BOOK)) {
+
+                        Bukkit.getLogger().info(Utils.format("Clicked item was book! Opening book..."));
+
+                        owner.closeInventory();
                         Utils.openBook(owner, clicked);
-                        close();
                     }
                     // If the item is a container, go into that directory...
                     else {
                         Container container = Utils.getContainer(clicked);
                         if (container != null) {
+
+                            Bukkit.getLogger().info(Utils.format("Clicked item was contained..."));
+
                             path.add(container);
                             updateDisplay();
+                        }
+                        else {
+                            Bukkit.getLogger().info(Utils.format("Clicked item was nothing functional."));
                         }
                     }
                 }
             }
         }
+        else {
+
+            Bukkit.getLogger().info(Utils.format("Event inv did not match gui inv!?!?!"));
+        }
     }
 
     public void updateDisplay() {
+
+        Bukkit.getLogger().info(Utils.format("Updating display..."));
 
         ItemStack[] background = new ItemStack[inventory.getSize()];
         ItemStack[] contents = path.get(path.size() - 1).getInventory().getStorageContents();
@@ -197,5 +213,6 @@ public class BookShelvesGui {
             ii++;
         }
         inventory.setContents(background);
+        owner.updateInventory();
     }
 }

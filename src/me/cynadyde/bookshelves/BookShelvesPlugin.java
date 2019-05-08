@@ -1,5 +1,6 @@
 package me.cynadyde.bookshelves;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -8,6 +9,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -28,7 +30,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
 
         // Close out any active guis on plugin disable...
         for (BookShelvesGui gui : BookShelvesGui.activeGuis()) {
-            gui.close();
+            gui.getOwner().closeInventory();
         }
     }
 
@@ -83,8 +85,13 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
         // Cancel normal interaction...
         event.setCancelled(true);
 
+        ItemStack cursor = event.getCursor();
+        if (cursor == null) {
+            cursor = new ItemStack(Material.AIR, 1);
+        }
+
         // Have the gui handle the event...
-        gui.onInteract(event.getWhoClicked(), event.getInventory(), event.getSlot(), event.getClick(), event.getCursor());
+        gui.onInteract(event.getWhoClicked(), event.getInventory(), event.getSlot(), event.getClick(), cursor);
     }
 
     /**
