@@ -10,19 +10,8 @@ authors:
   - Cynadyde (May 2019)
 depend:
   - ProtocolLib
-commands:
-  "bookshelves":
-    description: "bookshelves plugin commands."
+commands: {}
 permissions:
   bookshelves.*:
-    description: "Grants all plugin abilities."
-    default: op
-    children:
-      bookshelves.admin: true
-      bookshelves.player: true
-  bookshelves.admin:
-    description: "Grants the ability to reload the plugin's config."
-    default: false
-  bookshelves.player:
-    description: "Grants the ability to interact with bookshelves and view a list of gui templates."
+    description: "Grants the ability to interact with bookshelves."
     default: true

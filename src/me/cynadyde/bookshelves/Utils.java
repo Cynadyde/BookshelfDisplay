@@ -9,8 +9,14 @@ import io.netty.buffer.Unpooled;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -20,10 +26,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-@SuppressWarnings("WeakerAccess")
-public class Utils {
+@SuppressWarnings({"WeakerAccess", "unused"})
+class Utils {
 
     /**
      * Translates ampersands into color codes, then formats the string.
@@ -55,7 +60,7 @@ public class Utils {
         }
         catch (Exception ex) {
 
-            Bukkit.getLogger().log(Level.WARNING, "Unable to open book for " + player.getName(), ex);
+            Bukkit.getLogger().warning(String.format("Unable to open book for %s\n%s", player.getName(), ex));
         }
 
         player.getInventory().setItem(slot, old);
@@ -77,6 +82,18 @@ public class Utils {
     }
 
     /**
+     * Gets a container for the block if possible, else null.
+     */
+    public static @Nullable Container getContainer(Block block) {
+
+        BlockState blockState = block.getState();
+        if (!(blockState instanceof Container)) {
+            return null;
+        }
+        return (Container) blockState;
+    }
+
+    /**
      * Gets a container for the item stack if possible, else null.
      */
     public static @Nullable Container getContainer(ItemStack item) {
@@ -93,9 +110,49 @@ public class Utils {
     }
 
     /**
-     * Recursively gets each item from the list and from each nested container.
+     * Finds a container attached to the block either as an adjacent block or a container in an adjacent item-frame.
      * */
-    public static List<ItemStack> collectItems(ItemStack[] items, boolean containers) {
+    public static @Nullable Container getAttachedContainer(@Nullable Block block) {
+
+        if (block == null) {
+            return null;
+        }
+        // Look in all six directions from the block...
+        World world = block.getWorld();
+        for (BlockFace direction : new BlockFace[] {
+                BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
+        }) {
+            // If the adjacent block is a container, return it...
+            Block relBlock = block.getRelative(direction);
+            Container blockContainer = Utils.getContainer(relBlock);
+            if (blockContainer != null) {
+                return blockContainer;
+            }
+            // Look through any entities in each adjacent block...
+            for (Entity entity : (world.getNearbyEntities(relBlock.getBoundingBox()))) {
+
+                // Get the first item-frame attached to the block...
+                if (entity.getType().equals(EntityType.ITEM_FRAME)) {
+                    ItemFrame itemFrame = (ItemFrame) entity;
+                    if (itemFrame.getFacing().equals(direction)) {
+
+                        // If the contained item is a container, return it...
+                        ItemStack item = itemFrame.getItem();
+                        Container itemContainer = Utils.getContainer(item);
+                        if (itemContainer != null) {
+                            return itemContainer;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Recursively gets each item at the list and at each nested container.
+     * */
+    public static List<ItemStack> collectItems(ItemStack[] items) {
 
         List<ItemStack> results = new ArrayList<>();
 
@@ -118,33 +175,5 @@ public class Utils {
             results.addAll(collectItems(container.getInventory().getContents()));
         }
         return results;
-    }
-
-    /**
-     * Creates an item stack from a string containing the material name and the display name,
-     * separated by a space.
-     */
-    public static ItemStack buildItem(String string) {
-
-        String[] params = string.split(" ", 1);  // TODO proper regex that removes quotes, too
-        // TODO support for skull ids
-
-        String matString = "";
-        String nameString = null;
-
-        if (params.length > 0) {
-            matString = params[0];
-        }
-        if (params.length > 1) {
-            nameString = params[1];
-        }
-
-        try {
-            Material material = Material.valueOf(matString);
-            return itemStack(1, material, nameString);
-        }
-        catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 }
