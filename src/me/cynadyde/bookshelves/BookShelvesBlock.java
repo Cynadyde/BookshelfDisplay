@@ -61,12 +61,12 @@ public class BookShelvesBlock {
         return contents;
     }
 
-    public boolean isRootContainer() {
-        return (Utils.getContainer(this.root) != null);
+    public boolean rootIsAContainer() {
+        return Utils.getContainer(this.root) != null;
     }
 
     /**
-     * Sets the item in the item frame attached to the bookshelf as the root.
+     * Sets the whatever is in the item-frame attached to the bookshelf as the root.
      * If the root item was a container with a custom name, also sets the bookshelf's name.
      * */
     public void updateRoot() {
@@ -110,34 +110,6 @@ public class BookShelvesBlock {
         this.contents.clear();
 
         // Add all items found in the item frame to the bookshelf content...
-        this.contents.addAll(processContents(new ItemStack[] {this.root}, true));
-    }
-
-    /**
-     * Recursively gets each item from the list and from each nested container.
-     * */
-    private List<ItemStack> processContents(ItemStack[] items, boolean determineHasGUI) {
-
-        List<ItemStack> results = new ArrayList<>();
-
-        for (ItemStack item : items) {
-
-            // Add all items, including air...
-            if (item == null) {
-                results.add(new ItemStack(Material.AIR, 1));
-                continue;
-            }
-            results.add(item);
-
-            // If it is a container item...
-            Container container = Utils.getContainer(item);
-            if (container == null) {
-                continue;
-            }
-
-            // Recursively add all its contents to the results...
-            results.addAll(processContents(container.getInventory().getContents(), false));
-        }
-        return results;
+        this.contents.addAll(Utils.collectItems(new ItemStack[] {this.root}));
     }
 }

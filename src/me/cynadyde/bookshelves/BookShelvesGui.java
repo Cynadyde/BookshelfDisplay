@@ -2,10 +2,12 @@ package me.cynadyde.bookshelves;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,70 +23,88 @@ public class BookShelvesGui {
         return Collections.unmodifiableSet(activeGUIs);
     }
 
-    public static @Nullable BookShelvesGui getGUI(@NotNull String playerName) {
-        for (BookShelvesGui gui : activeGUIs) {
-            if (gui.player.getName().equalsIgnoreCase(playerName)) {
-                return gui;
+    /**
+     * Fetches an opened gui from a known inventory.
+     */
+    public static @Nullable BookShelvesGui getGUI(@Nullable Inventory inventory) {
+
+        if (inventory != null) {
+            for (BookShelvesGui gui : activeGUIs) {
+                if (gui.getView().getInventory().equals(inventory)) {
+                    return gui;
+                }
             }
         }
         return null;
     }
 
-    public static @Nullable BookShelvesGui getGUI(@NotNull Inventory inventory) {
-        for (BookShelvesGui gui : activeGUIs) {
-            if (gui.view.getInventory().equals(inventory)) {
-                return gui;
+    /**
+     * Fetches an opened gui from a known block.
+     */
+    public static @Nullable BookShelvesGui getGui(@Nullable Block block) {
+
+        if (block != null) {
+            for (BookShelvesGui gui : activeGUIs) {
+                if (gui.getBookShelf().getAnchor().equals(block)) {
+                    return gui;
+                }
             }
         }
         return null;
     }
 
+    /**
+     * Fetches an opened gui from a known owner.
+     */
+    public static @Nullable BookShelvesGui getGUI(@Nullable Player owner) {
+
+        if (owner != null) {
+            for (BookShelvesGui gui : activeGUIs) {
+                if (gui.getOwner().equals(owner)) {
+                    return gui;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Opens the gui for a bookshelf with the given player.
+     */
     public static void openGUI(@NotNull BookShelvesBlock bookshelf, @NotNull Player player) {
-        activeGUIs.add(new BookShelvesGui(bookshelf, player));
+        BookShelvesGui gui = new BookShelvesGui(bookshelf, player);
+        player.openInventory(gui.getView().getInventory());
+        activeGUIs.add(gui);
     }
 
     public static final String titlePrefix = "[BookShelf] ";
 
-//    public static final int slotsPerRow = 9;
-//    public static final int rows = 3;
-//    public static final int size = rows * slotsPerRow;
-//
-//    public static final int booksPerShelf = 5;
-//    public static final int backButtonIndex = (slotsPerRow * 1) + 1;
-//    public static final int nextButtonIndex = (slotsPerRow * 1) + 7;
-
-    private Player player;
     private BookShelvesBlock bookShelf;
-    private GuiViewer view;
-//    private Inventory inventory;
-//    private GuiStyle template;
-//    private int totalPages;
-//    private int currentPage;
+    private Player owner;
+    private BookShelvesView view;
 
-    private BookShelvesGui(BookShelvesBlock bookShelf, Player player) {
+    private BookShelvesGui(@NotNull BookShelvesBlock bookShelf, @NotNull Player owner) {
 
-        // TODO store guis as BookShelfBlock -> List<Player> in future? use xyz of block as hash
-        // ACTUALLY, do you even need to store players? they can be retrieved from geView().getInventory()...
-
-        this.player = player;
+        this.owner = owner;
         this.bookShelf = bookShelf;
 
-        GuiStyle template = GuiStyle.getStyle(bookShelf.getName(), bookShelf.getContents().size());
-        this.view = (template != null) ? new TemplateViewer(template) : new DirectoryViewer();
+        GuiStyle template = GuiStyle.getStyle(null, bookShelf.getContents().size());
+        // this.view = (template != null) ? new TemplateView(template) : new DirectoryView();
+        assert (template != null);
+        this.view = new TemplateView(template);
 
         view.updateDisplay();
-        player.openInventory(view.getInventory());
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public BookShelvesBlock getBookShelf() {
+    public @NotNull BookShelvesBlock getBookShelf() {
         return bookShelf;
     }
 
-    public GuiViewer getView() {
+    public @NotNull Player getOwner() {
+        return owner;
+    }
+
+    public @NotNull BookShelvesView getView() {
         return view;
     }
 
@@ -97,7 +117,10 @@ public class BookShelvesGui {
         activeGUIs.remove(this);
     }
 
-    public interface GuiViewer {
+    /**
+     * Links the contents of a bookshelf to an inventory.
+     */
+    public interface BookShelvesView {
 
         @NotNull Inventory getInventory();
 
@@ -106,7 +129,10 @@ public class BookShelvesGui {
         void slotClicked(@NotNull Player player, int slot);
     }
 
-    public class TemplateViewer implements GuiViewer {
+    /**
+     * Uses a style template to display the contents of a bookshelf in an inventory.
+     */
+    public class TemplateView implements BookShelvesView {
 
         private ItemStack prevButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&4&lLast Shelf"));
         private ItemStack nextButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&2&lNext Shelf"));
@@ -116,15 +142,27 @@ public class BookShelvesGui {
         private int currentPage;
 
 
-        TemplateViewer(GuiStyle template) {
+        TemplateView(GuiStyle template) {
 
             this.template = template;
 
+            ItemStack[] trim = GuiStyle.getNavBarBackground();
             ItemStack[] background = template.getBackground();
-            this.inventory = Bukkit.createInventory(player, background.length);
 
-            for (int i = 0; i < background.length; i++) {
-                inventory.setItem(i, background[i]);
+            this.inventory = Bukkit.createInventory(owner, trim.length + background.length + trim.length);
+
+            int i = 0;
+            for (ItemStack item : trim) {
+                inventory.setItem(i, item);
+                i++;
+            }
+            for (ItemStack item : background) {
+                inventory.setItem(i, item);
+                i++;
+            }
+            for (ItemStack item : trim) {
+                inventory.setItem(i, item);
+                i++;
             }
             this.currentPage = 0;
         }
@@ -141,22 +179,20 @@ public class BookShelvesGui {
             int itemsPerPage = template.contentIndices().length;
             int totalPages = (int) Math.ceil(totalItems / (double) itemsPerPage);
 
-            // Make sure current page isn't out of bounds...
             currentPage = Math.max(0, Math.min(currentPage, totalPages));
 
-            // Determine the start and end index of the current shelf...
             int startIndex = currentPage * itemsPerPage;
             int endIndex = Math.max(startIndex, Math.min(startIndex + itemsPerPage, totalItems));
 
-            // Get the shelf of books that will be displayed...
+            // Get the page of books that will be displayed...
             List<ItemStack> viewedContents = (endIndex > startIndex) ?
                     bookShelf.getContents().subList(startIndex, endIndex) : new ArrayList<>();
 
-            // Write in the forward-button if it should be displayed...
+            // Write in the previous-button if it should be displayed...
             inventory.setItem(template.prevBtnIndex(), (startIndex > 0) ?
                     prevButton : template.getBackground()[template.prevBtnIndex()]);
 
-            // Write in the previous-button if it should be displayed...
+            // Write in the next-button if it should be displayed...
             inventory.setItem(template.nextBtnIndex(), (endIndex < totalItems) ?
                     nextButton : template.getBackground()[template.nextBtnIndex()]);
 
@@ -167,7 +203,12 @@ public class BookShelvesGui {
                 inventory.setItem(template.contentIndices()[i], (t >= endIndex) ?
                         viewedContents.get(i) : template.getBackground()[i]);
             }
-            player.updateInventory();
+            // Update all player-viewers' inventories...
+            for (HumanEntity human : inventory.getViewers()) {
+                if (human instanceof Player) {
+                    ((Player) human).updateInventory();
+                }
+            }
         }
 
         @Override
@@ -177,30 +218,30 @@ public class BookShelvesGui {
         }
     }
 
-    public class DirectoryViewer implements GuiViewer {
-
-        private Inventory inventory;
-        private List<ItemStack> currentPath;
-
-        DirectoryViewer() {
-
-            this.inventory = null;
-        }
-
-        @Override
-        public @NotNull Inventory getInventory() {
-            return inventory;
-        }
-
-        @Override
-        public void updateDisplay() {
-
-            // draw last item in path to inventory
-        }
-
-        @Override
-        public void slotClicked(@NotNull Player player, int slot) {
-
-        }
-    }
+//    public class DirectoryView implements BookShelvesView {
+//
+//        private Inventory inventory;
+//        private List<ItemStack> currentPath;
+//
+//        DirectoryView() {
+//
+//            this.inventory = null;
+//        }
+//
+//        @Override
+//        public @NotNull Inventory getInventory() {
+//            return inventory;
+//        }
+//
+//        @Override
+//        public void updateDisplay() {
+//
+//            // draw last item in path to inventory
+//        }
+//
+//        @Override
+//        public void slotClicked(@NotNull Player player, int slot) {
+//
+//        }
+//    }
 }

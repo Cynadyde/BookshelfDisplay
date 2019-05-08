@@ -18,6 +18,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 @SuppressWarnings("WeakerAccess")
@@ -88,6 +90,34 @@ public class Utils {
             return null;
         }
         return (Container) itemState;
+    }
+
+    /**
+     * Recursively gets each item from the list and from each nested container.
+     * */
+    public static List<ItemStack> collectItems(ItemStack[] items, boolean containers) {
+
+        List<ItemStack> results = new ArrayList<>();
+
+        for (ItemStack item : items) {
+
+            // Add all items, including air and other containers...
+            if (item == null) {
+                results.add(new ItemStack(Material.AIR, 1));
+                continue;
+            }
+            results.add(item);
+
+            // If it is a container item...
+            Container container = getContainer(item);
+            if (container == null) {
+                continue;
+            }
+
+            // Recursively add all its contents to the results...
+            results.addAll(collectItems(container.getInventory().getContents()));
+        }
+        return results;
     }
 
     /**

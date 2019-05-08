@@ -1,4 +1,12 @@
 
+# Messages sent into chat by the plugin.
+#
+messages:
+  tag:         "&f[&bBookShelves&f]&r"
+  no-perms:    "&cInsufficient permissions... "
+  unknown-cmd: "&cUnknown command: &6/%s %s &c... "
+  bad-args:    "&cUsage: &6%s &c..."
+
 # The material type and display name of
 # the items to use as buttons in the GUI.
 #
@@ -7,26 +15,19 @@ buttons:
   next-button: item_frame "&2&lNext Shelf"
   up-button:   item_frame "&3&lGo Up"
 
-
-# The template of the navigation bar
-# that is added to the top of each GUI.
+# A trim added to the top & bottom of each GUI.
 #
-nav-style:
+trim-style:
   pattern: >
     .........
   key:
     '.': black_stained_glass_pane
-  up-button: 1
-
 
 # The default GUI style is shown if there are no containers
-# with custom names in the item-frame attached to a bookshelf.
+# with custom names in the item-frame attached to a bookshelf
+# or if the custom name doesn't match a style defined below.
 #
-default-style:
-  0: default-small    # >=  0 items
-  15: default-medium  # >= 15 items
-  31: default-large   # >= 31 items
-
+default-style: default-medium
 
 # If a container has a custom name that matches one of
 # these, it will use that style when displaying its GUI.
@@ -47,7 +48,7 @@ gui-styles:
       '+': purple_stained_glass_pane
     prev-button: 10
     next-button: 16
-    contentIndices: [11, 12, 13, 14, 15]
+    content: [11, 12, 13, 14, 15]
 
   default-medium:
     pattern: >
@@ -63,7 +64,7 @@ gui-styles:
       '+': purple_stained_glass_pane
     prev-button: 19
     next-button: 25
-    contentIndices: [29, 30, 31, 32, 33, 20, 21, 22, 23, 24, 12, 13, 14]
+    content: [12, 13, 14, 20, 21, 22, 23, 24, 29, 30, 31, 32, 33]
 
   default-large:
     pattern: >
@@ -83,7 +84,7 @@ gui-styles:
       '+': purple_stained_glass_pane
     prev-button: 37
     next-button: 43
-    contentIndices: [66, 67, 68, 56, 57, 58, 59, 60, 47, 48, 49, 50, 51, 38, 39, 40, 41, 42, 29, 30, 31, 32, 33, 20, 21, 22, 23, 24, 12, 13, 14]
+    content: [12, 13, 14, 20, 21, 22, 23, 24, 29, 30, 31, 32, 33, 38, 39, 40, 41, 42, 47, 48, 49, 50, 51, 56, 57, 58, 59, 60, 66, 67, 68]
 
   oak-tiny:
     pattern: >
@@ -92,6 +93,6 @@ gui-styles:
       '-': oak_planks
       '#': oak_log
       '=': gray_stained_glass_pane
-      prev-button: 1
-      next-button: 7
-      contentIndices: [3, 4, 5]
+    prev-button: 1
+    next-button: 7
+    content: [3, 4, 5]
