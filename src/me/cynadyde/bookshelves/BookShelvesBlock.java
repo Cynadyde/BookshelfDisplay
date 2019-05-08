@@ -10,18 +10,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BlockStateMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/** A functional bookshelf with a view of its content */
+/**
+ * A functional bookshelf with a view of its content.
+ * */
 @SuppressWarnings({ "WeakerAccess", "unused" })
 public class BookShelvesBlock {
-
-    // TODO control the gui display template using containers
-    // TODO taking books from shelf unless no perms (hooking into other plugins) ???????
-    // TODO "directory view" using nested containers
 
     public @Nullable static BookShelvesBlock from(@NotNull Block block) {
 
@@ -29,46 +25,54 @@ public class BookShelvesBlock {
         if (!block.getType().equals(Material.BOOKSHELF)) {
             return null;
         }
-        // Create a bookshelf object and updateDisplay its contents...
+        // Create a bookshelf object and update its contents...
         BookShelvesBlock bookshelf = new BookShelvesBlock(block);
-        bookshelf.updateContents();
+        bookshelf.updateRoot();
 
-        // If the bookshelf is empty, just return null...
-        return (bookshelf.getContents().isEmpty())? null : bookshelf;
+        // If the bookshelf has no root, just return null...
+        return (bookshelf.getRoot() == null) ? null : bookshelf;
     }
 
     private Block anchor;
     private String name;
-    private boolean hasGUI;
+    private ItemStack root;
     private List<ItemStack> contents;
 
     private BookShelvesBlock(@NotNull Block block) {
         this.anchor = block;
-        this.name = "Bookshelf";
-        this.hasGUI = false;
+        this.name = null;
+        this.root = null;
         this.contents = new ArrayList<>();
     }
 
-    public Block getAnchor() {
+    public @NotNull Block getAnchor() {
         return anchor;
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public boolean hasGUI() {
-        return hasGUI;
+    public @Nullable ItemStack getRoot() {
+        return root;
     }
 
-    public List<ItemStack> getContents() {
+    public @NotNull List<ItemStack> getContents() {
         return contents;
     }
 
-    public void updateContents() {
+    public boolean isRootContainer() {
+        return (Utils.getContainer(this.root) != null);
+    }
 
-        this.hasGUI = false;
-        this.contents.clear();
+    /**
+     * Sets the item in the item frame attached to the bookshelf as the root.
+     * If the root item was a container with a custom name, also sets the bookshelf's name.
+     * */
+    public void updateRoot() {
+
+        this.name = null;
+        this.root = null;
 
         // Look in all six directions from the bookshelf...
         World world = this.anchor.getWorld();
@@ -79,50 +83,60 @@ public class BookShelvesBlock {
             for (Entity entity : (world.getNearbyEntities(relBlock.getBoundingBox()))) {
                 if (entity.getType().equals(EntityType.ITEM_FRAME)) {
 
-                    // For each item frame attached to the bookshelf...
+                    // Get the first item frame attached to the bookshelf...
                     ItemFrame itemFrame = (ItemFrame) entity;
                     if (itemFrame.getFacing().equals(direction)) {
 
-                        // Add all books found in the item frame...
-                        this.contents.addAll(processBooks(new ItemStack[] {itemFrame.getItem()}, true));
+                        // Save its item as the root...
+                        this.root = itemFrame.getItem();
+
+                        // Set the name of the bookshelf if the item was a container with a custom name...
+                        Container container = Utils.getContainer(this.root);
+                        if (container != null) {
+                            this.name = container.getCustomName();
+                        }
+                        return;
                     }
                 }
             }
         }
-        if (this.contents.size() > 1) {
-            this.hasGUI = true;
-        }
     }
 
-    /* recursively gets a copy of each written book from a container and its nested containers */
-    private @NotNull List<ItemStack> processBooks(@NotNull ItemStack[] items, boolean determineHasGUI) {
+    /**
+     * Updates the bookshelf's list of all items contained in the root.
+     * */
+    public void updateContents() {
+
+        this.contents.clear();
+
+        // Add all items found in the item frame to the bookshelf content...
+        this.contents.addAll(processContents(new ItemStack[] {this.root}, true));
+    }
+
+    /**
+     * Recursively gets each item from the list and from each nested container.
+     * */
+    private List<ItemStack> processContents(ItemStack[] items, boolean determineHasGUI) {
 
         List<ItemStack> results = new ArrayList<>();
 
         for (ItemStack item : items) {
 
-            // If it contains a written book, add that book to the results...
-            if (item.getType().equals(Material.WRITTEN_BOOK)) {
-                results.add(item);
-            }
-
-            // If it contains a container item...
-            ItemMeta itemMeta = item.getItemMeta();
-            if (!(itemMeta instanceof BlockStateMeta)) {
+            // Add all items, including air...
+            if (item == null) {
+                results.add(new ItemStack(Material.AIR, 1));
                 continue;
             }
-            BlockState itemState = ((BlockStateMeta) itemMeta).getBlockState();
-            if (!(itemState instanceof Container)) {
+            results.add(item);
+
+            // If it is a container item...
+            Container container = Utils.getContainer(item);
+            if (container == null) {
                 continue;
             }
 
-            // Recursively add all its written books to the results...
-            Container container = (Container) itemState;
-            results.addAll(processBooks(container.getInventory().getContents(), false));
-
-            if (determineHasGUI) {
-                this.hasGUI = true;
-            }
+            // Recursively add all its contents to the results...
+            results.addAll(processContents(container.getInventory().getContents(), false));
         }
         return results;
     }

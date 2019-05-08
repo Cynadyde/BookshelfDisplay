@@ -9,8 +9,11 @@ import io.netty.buffer.Unpooled;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,12 +23,16 @@ import java.util.logging.Level;
 @SuppressWarnings("WeakerAccess")
 public class Utils {
 
-    /* applies String.format and ChatColor.translateAlternateColorCodes */
-    public static @NotNull String format(@NotNull String message, Object...objs) {
+    /**
+     * Translates ampersands into color codes, then formats the string.
+     */
+    public static @NotNull String format(@NotNull String message, Object... objs) {
         return String.format(ChatColor.translateAlternateColorCodes('&', message), objs);
     }
 
-    /* have the player read a book that they do not possess */
+    /**
+     * Opens the book for the player without giving it to them.
+     */
     public static void openBook(@NotNull Player player, @NotNull ItemStack book) {
 
         int slot = player.getInventory().getHeldItemSlot();
@@ -52,8 +59,10 @@ public class Utils {
         player.getInventory().setItem(slot, old);
     }
 
-    /* Creates an item stack with the given amount, material, and name */
-    public static @NotNull ItemStack itemStack(int amount, @NotNull Material material,@Nullable String name) {
+    /**
+     * Creates an item stack with the given amount, material, and name.
+     */
+    public static @NotNull ItemStack itemStack(int amount, @NotNull Material material, @Nullable String name) {
         ItemStack itemStack = new ItemStack(material, amount);
         if (name != null) {
             ItemMeta meta = itemStack.getItemMeta();
@@ -63,5 +72,49 @@ public class Utils {
             itemStack.setItemMeta(meta);
         }
         return itemStack;
+    }
+
+    /**
+     * Gets a container for the item stack if possible, else null.
+     */
+    public static @Nullable Container getContainer(ItemStack item) {
+
+        ItemMeta itemMeta = item.getItemMeta();
+        if (!(itemMeta instanceof BlockStateMeta)) {
+            return null;
+        }
+        BlockState itemState = ((BlockStateMeta) itemMeta).getBlockState();
+        if (!(itemState instanceof Container)) {
+            return null;
+        }
+        return (Container) itemState;
+    }
+
+    /**
+     * Creates an item stack from a string containing the material name and the display name,
+     * separated by a space.
+     */
+    public static ItemStack buildItem(String string) {
+
+        String[] params = string.split(" ", 1);  // TODO proper regex that removes quotes, too
+        // TODO support for skull ids
+
+        String matString = "";
+        String nameString = null;
+
+        if (params.length > 0) {
+            matString = params[0];
+        }
+        if (params.length > 1) {
+            nameString = params[1];
+        }
+
+        try {
+            Material material = Material.valueOf(matString);
+            return itemStack(1, material, nameString);
+        }
+        catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package me.cynadyde.bookshelves;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,20 +17,43 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuppressWarnings({ "WeakerAccess", "unused" })
 public class BookShelvesPlugin extends JavaPlugin implements Listener, CommandExecutor {
 
-    public static final String tag = Utils.format("&f[&9BookShelves&f]&r ");
+    PluginCommand mainCmd;
+
+    /**
+     * Formatted text to be sent to chat / console by the plugin.
+     */
+    public static class Msgs {
+
+        public static final String tag = Utils.format("&f[&bBookShelves&f]&r ");
+
+        public static String noPerms() {
+            return tag + Utils.format("&cInsufficient permissions... ");
+        }
+
+        public static String unknownCmd(String alias, String...args) {
+            return tag + Utils.format("&cUnknown command: &6/%s %s &c... ", alias, String.join(" ", args));
+        }
+
+        public static String badArgs(String usage) {
+            return tag + Utils.format("&cUsage: &6%s &c...");
+        }
+    }
 
     @Override
     public void onEnable() {
 
         // Register plugin commands...
-        PluginCommand cmdReloadConfig = getCommand("bookshelves reloadconfig");
-        if (cmdReloadConfig != null) {
-            cmdReloadConfig.setExecutor(this);
-            cmdReloadConfig.setPermissionMessage(tag + Utils.format("&cInsufficient permissions."));
-        }
+        mainCmd = getCommand("bookshelves");
+        assert (mainCmd != null);
+
+        mainCmd.setExecutor(this);
+
         // Register plugin event listeners...
         getServer().getPluginManager().registerEvents(this, this);
 
@@ -37,14 +61,14 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener, CommandEx
         saveDefaultConfig();
         reloadConfig();
 
-        GuiTemplate.refreshDataFromConfig(getLogger(), getConfig());
+        GuiStyle.refreshDataFromConfig(getLogger(), getConfig());
     }
 
     @Override
     public void onDisable() {
 
-        // Close any active GUIs...
-        for (BookShelvesGUI gui : BookShelvesGUI.activeGUIs()) {
+        // Close any active GUIs on plugin disable...
+        for (BookShelvesGui gui : BookShelvesGui.activeGUIs()) {
             gui.close();
         }
     }
@@ -52,9 +76,114 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener, CommandEx
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
 
-        GuiTemplate.refreshDataFromConfig(getLogger(), getConfig());
+        // The '/bookshelves' command...
+        if (!alias.equalsIgnoreCase("bookshelves")) {
+            return false;
+        }
+        // Sender has player permissions...
+        if (!sender.hasPermission("bookshelves.player")) {
+            sender.sendMessage(Msgs.noPerms());
+        }
+        // No arguments given...
+        if (args.length == 0) {
 
-        return true;
+            List<String> message = new ArrayList<>();
+
+            // Message header with plugin name & version...
+            message.add(Utils.format("&e==--===--==&f{ &9&l%s &f}&e==--===--==", getDescription().getFullName()));
+
+            // Plugin description...
+            message.add(Utils.format("&6%s", getDescription().getDescription()));
+            message.add(Utils.format("&e%s", getDescription().getWebsite()));
+
+            // Plugin help...
+            message.add(Utils.format("&aSimply attach an item-frame to a bookshelf block. " +
+                    "You may put a book there or a container full of books."));
+
+            // List of commands...
+            message.add(Utils.format("&b/bookshelves templates [<page>]"));
+            message.add(Utils.format("&7Display a list of GUI templates defined in the config. " +
+                    "To use these, name a container and place it in the bookshelf's item frame."));
+
+            message.add(Utils.format("&b/bookshelves reloadconfig"));
+            message.add(Utils.format("&7Reload the plugin's configuration file."));
+            message.add("");
+
+            // Send the message...
+            sender.sendMessage(message.toArray(new String[message.size()]));
+            return true;
+        }
+
+        // The '/bookshelves templates' command...
+        else if (args[0].equalsIgnoreCase("templates")) {
+
+            String pageStr = "1";
+            int page = 1;
+
+            // A page argument was given...
+            if (args.length == 2) {
+
+                pageStr = args[1];
+                try {
+                    page = Integer.parseInt(pageStr);
+                }
+                catch (NumberFormatException ex) {
+                    page = 0;
+                }
+            }
+            // To many arguments were given...
+            else if (args.length > 2) {
+                sender.sendMessage(Msgs.badArgs("/bookshelves templates [<page>]"));
+                return false;
+            }
+
+            // Get the list of templates...
+            List<String> templates = GuiStyle.getStyles();
+
+            // Determine start and end index...
+            page -= 1;
+            int totalItems = templates.size();
+            int itemsPerPage = 12;
+            int maxPage = (int) Math.ceil(totalItems / (double) itemsPerPage);
+            int startIndex = (page * itemsPerPage);
+            int endIndex = startIndex + itemsPerPage;
+
+            List<String> message = new ArrayList<>();
+
+            // Message header and page number...
+            message.add(Utils.format("&e==--===--==&f{ &9&l%s &b&lTemplates &6pg &c%s/%d &f}&e==--===--==",
+                    getDescription().getName(), pageStr, maxPage));
+
+            // Add the page of template names to the message...
+            for (int i = startIndex; i < endIndex; i++) {
+                if (i < templates.size()) {
+                    message.add(Utils.format("&7- &a%s", templates.get(i)));
+                }
+            }
+            // Send the message...
+            sender.sendMessage(new String[message.size()]);
+            return true;
+        }
+
+        // The '/bookshelves reloadconfig' command...
+        else if (args[0].equalsIgnoreCase("reloadconfig")) {
+
+            // Sender has admin perms...
+            if (!sender.hasPermission("bookshelves.admin")) {
+                sender.sendMessage(Msgs.noPerms());
+                return false;
+            }
+
+            // reload the config and refresh cached data...
+            reloadConfig();
+            GuiStyle.refreshDataFromConfig(getLogger(), getConfig());
+            return true;
+        }
+        // Unknown command...
+        else {
+            sender.sendMessage(Msgs.unknownCmd(alias, args));
+            return false;
+        }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -81,16 +210,21 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener, CommandEx
         if (bookShelf == null) {
             return;
         }
+        // The bookshelf has a root item...
+        if (bookShelf.getRoot() == null) {
+            return;
+        }
         // Cancel the interaction event...
         event.setCancelled(true);
 
-        // If the bookshelf has a GUI, show it to the player...
-        if (bookShelf.hasGUI()) {
-            BookShelvesGUI.openGUI(event.getPlayer(), bookShelf);
+        // If auto-view is true and the root is a written book, open it for player...
+        if (getConfig().getBoolean("auto-view", true)
+                && bookShelf.getRoot().getType().equals(Material.WRITTEN_BOOK)) {
+            Utils.openBook(event.getPlayer(), bookShelf.getRoot());
         }
-        // Otherwise, show the first book to the player...
+        // Otherwise, open the bookshelf GUI for the player...
         else {
-            Utils.openBook(event.getPlayer(), bookShelf.getContents().get(0));
+            BookShelvesGui.openGUI(bookShelf, event.getPlayer());
         }
     }
 
@@ -103,27 +237,30 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener, CommandEx
         if (inv == null) {
             return;
         }
-        // The inventory is a bookshelf GUI...
-        BookShelvesGUI gui = BookShelvesGUI.getGUI(inv);
-        if (gui == null) {
-            return;
-        }
-        // A player interacted with the inventory GUI...
+        // A player interacted with the inventory...
         if (!(event.getWhoClicked() instanceof Player)) {
             return;
         }
         Player player = (Player) event.getWhoClicked();
 
-        // Interact with the GUI and cancel the click event...
-        gui.slotClicked(player, event.getSlot());
+        // The inventory is a bookshelf GUI...
+        BookShelvesGui gui = BookShelvesGui.getGUI(inv);
+        if (gui == null) {
+            return;
+        }
+        // Cancel normal interaction...
         event.setCancelled(true);
+
+        // Have the GUI handle the event...
+        gui.getView().slotClicked(player, event.getSlot());
 
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(InventoryCloseEvent event) {
 
-        BookShelvesGUI gui = BookShelvesGUI.getGUI(event.getInventory());
+        // If the inventory was a bookshelf GUI, close the GUI...
+        BookShelvesGui gui = BookShelvesGui.getGUI(event.getInventory());
         if (gui != null) {
             gui.close();
         }

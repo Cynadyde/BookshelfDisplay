@@ -13,35 +13,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @SuppressWarnings({ "WeakerAccess", "SameParameterValue", "unused", "PointlessArithmeticExpression" })
-// TODO refactor GUI to Gui
-public class BookShelvesGUI {
+public class BookShelvesGui {
 
-    // TODO build gui from template
+    private static final Set<BookShelvesGui> activeGUIs = new HashSet<>();
 
-    // Define the items used in the GUI
-    private static ItemStack backButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&4&lLast Shelf"));
-    private static ItemStack forwardButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&2&lNext Shelf"));
-//    private static ItemStack blackBG = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
-//    private static ItemStack blueBG = Utils.itemStack(1, Material.BLUE_STAINED_GLASS_PANE, " ");
-//    private static ItemStack redBG = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, " ");
-//    private static ItemStack purpleBG = Utils.itemStack(1, Material.PURPLE_STAINED_GLASS_PANE, " ");
-
-
-    // The make-up of the background of the GUI
-//    private static final ItemStack[] background = new ItemStack[]{
-//            blackBG, blueBG, redBG, redBG, redBG, redBG, redBG, blueBG, blackBG,
-//            blackBG, blueBG, purpleBG, purpleBG, purpleBG, purpleBG, purpleBG, blueBG, blackBG,
-//            blackBG, blueBG, blackBG, blackBG, blackBG, blackBG, blackBG, blueBG, blackBG
-//    };
-
-    private static final Set<BookShelvesGUI> activeGUIs = new HashSet<>();
-
-    public static @NotNull Set<BookShelvesGUI> activeGUIs() {
+    public static @NotNull Set<BookShelvesGui> activeGUIs() {
         return Collections.unmodifiableSet(activeGUIs);
     }
 
-    public static @Nullable BookShelvesGUI getGUI(@NotNull String playerName) {
-        for (BookShelvesGUI gui : activeGUIs) {
+    public static @Nullable BookShelvesGui getGUI(@NotNull String playerName) {
+        for (BookShelvesGui gui : activeGUIs) {
             if (gui.player.getName().equalsIgnoreCase(playerName)) {
                 return gui;
             }
@@ -49,8 +30,8 @@ public class BookShelvesGUI {
         return null;
     }
 
-    public static @Nullable BookShelvesGUI getGUI(@NotNull Inventory inventory) {
-        for (BookShelvesGUI gui : activeGUIs) {
+    public static @Nullable BookShelvesGui getGUI(@NotNull Inventory inventory) {
+        for (BookShelvesGui gui : activeGUIs) {
             if (gui.view.getInventory().equals(inventory)) {
                 return gui;
             }
@@ -58,8 +39,8 @@ public class BookShelvesGUI {
         return null;
     }
 
-    public static void openGUI(@NotNull Player player, @NotNull BookShelvesBlock bookshelf) {
-        activeGUIs.add(new BookShelvesGUI(player, bookshelf));
+    public static void openGUI(@NotNull BookShelvesBlock bookshelf, @NotNull Player player) {
+        activeGUIs.add(new BookShelvesGui(bookshelf, player));
     }
 
     public static final String titlePrefix = "[BookShelf] ";
@@ -76,11 +57,11 @@ public class BookShelvesGUI {
     private BookShelvesBlock bookShelf;
     private GuiViewer view;
 //    private Inventory inventory;
-//    private GuiTemplate template;
-//    private int maxPage;
+//    private GuiStyle template;
+//    private int totalPages;
 //    private int currentPage;
 
-    private BookShelvesGUI(Player player, BookShelvesBlock bookShelf) {
+    private BookShelvesGui(BookShelvesBlock bookShelf, Player player) {
 
         // TODO store guis as BookShelfBlock -> List<Player> in future? use xyz of block as hash
         // ACTUALLY, do you even need to store players? they can be retrieved from geView().getInventory()...
@@ -88,7 +69,7 @@ public class BookShelvesGUI {
         this.player = player;
         this.bookShelf = bookShelf;
 
-        GuiTemplate template = GuiTemplate.getTemplate(bookShelf.getName(), bookShelf.getContents().size());
+        GuiStyle template = GuiStyle.getStyle(bookShelf.getName(), bookShelf.getContents().size());
         this.view = (template != null) ? new TemplateViewer(template) : new DirectoryViewer();
 
         view.updateDisplay();
@@ -109,18 +90,14 @@ public class BookShelvesGUI {
 
     public void close() {
 
-        for (HumanEntity human : inventory.getViewers()) {
+        for (HumanEntity human : view.getInventory().getViewers()) {
             InventoryCloseEvent event = new InventoryCloseEvent(human.getOpenInventory());
             Bukkit.getPluginManager().callEvent(event);
         }
         activeGUIs.remove(this);
     }
 
-    public void slotClicked(Player player, int slot) {
-
-    }
-
-    private interface GuiViewer {
+    public interface GuiViewer {
 
         @NotNull Inventory getInventory();
 
@@ -129,14 +106,17 @@ public class BookShelvesGUI {
         void slotClicked(@NotNull Player player, int slot);
     }
 
-    private class TemplateViewer implements GuiViewer {
+    public class TemplateViewer implements GuiViewer {
 
-        private GuiTemplate template;
+        private ItemStack prevButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&4&lLast Shelf"));
+        private ItemStack nextButton = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&2&lNext Shelf"));
+
+        private GuiStyle template;
         private Inventory inventory;
-        private int maxPage;
         private int currentPage;
 
-        TemplateViewer(GuiTemplate template) {
+
+        TemplateViewer(GuiStyle template) {
 
             this.template = template;
 
@@ -146,7 +126,6 @@ public class BookShelvesGUI {
             for (int i = 0; i < background.length; i++) {
                 inventory.setItem(i, background[i]);
             }
-            this.maxPage = (int) Math.ceil(bookShelf.getContents().size() / (double) template.getContent().length);
             this.currentPage = 0;
         }
 
@@ -158,23 +137,35 @@ public class BookShelvesGUI {
         @Override
         public void updateDisplay() {
 
-            currentPage = Math.max(0, Math.min(currentPage + pageChange, maxPage));
+            int totalItems = bookShelf.getContents().size();
+            int itemsPerPage = template.contentIndices().length;
+            int totalPages = (int) Math.ceil(totalItems / (double) itemsPerPage);
+
+            // Make sure current page isn't out of bounds...
+            currentPage = Math.max(0, Math.min(currentPage, totalPages));
+
+            // Determine the start and end index of the current shelf...
+            int startIndex = currentPage * itemsPerPage;
+            int endIndex = Math.max(startIndex, Math.min(startIndex + itemsPerPage, totalItems));
 
             // Get the shelf of books that will be displayed...
-            int viewingIndex = currentPage * booksPerShelf;
-            int startIndex = Math.max(0, Math.min(viewingIndex, bookShelf.getContents().size() - 1));
-            int endIndex = Math.max(startIndex, Math.min(startIndex + booksPerShelf, bookShelf.getContents().size()));
+            List<ItemStack> viewedContents = (endIndex > startIndex) ?
+                    bookShelf.getContents().subList(startIndex, endIndex) : new ArrayList<>();
 
-            List<ItemStack> viewedContents = (endIndex > startIndex) ? bookShelf.getContents().subList(startIndex, endIndex) : new ArrayList<>();
+            // Write in the forward-button if it should be displayed...
+            inventory.setItem(template.prevBtnIndex(), (startIndex > 0) ?
+                    prevButton : template.getBackground()[template.prevBtnIndex()]);
 
-            // Write in the navigation buttons if they should be displayed...
-            inventory.setItem(backButtonIndex, (startIndex > 0) ? backButton : background[backButtonIndex]);
-            inventory.setItem(nextButtonIndex, (endIndex < bookShelf.getContents().size()) ? forwardButton : background[nextButtonIndex]);
+            // Write in the previous-button if it should be displayed...
+            inventory.setItem(template.nextBtnIndex(), (endIndex < totalItems) ?
+                    nextButton : template.getBackground()[template.nextBtnIndex()]);
 
-            // Write in the shelf's books or their background counterpart...
-            for (int i = 0; i < 5; i++) {
-                inventory.setItem((slotsPerRow * 1) + 2 + i, (i > viewedContents.size() - 1) ?
-                        background[(slotsPerRow * 1) + 2 + i] : viewedContents.get(i));
+            // Write in the content that should be displayed...
+            for (int i = 0; i < itemsPerPage; i++) {
+
+                int t = i + startIndex;
+                inventory.setItem(template.contentIndices()[i], (t >= endIndex) ?
+                        viewedContents.get(i) : template.getBackground()[i]);
             }
             player.updateInventory();
         }
@@ -186,7 +177,7 @@ public class BookShelvesGUI {
         }
     }
 
-    private class DirectoryViewer implements GuiViewer {
+    public class DirectoryViewer implements GuiViewer {
 
         private Inventory inventory;
         private List<ItemStack> currentPath;

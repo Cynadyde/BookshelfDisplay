@@ -11,10 +11,8 @@ authors:
 depend:
   - ProtocolLib
 commands:
-  "bookshelves reloadconfig":
-    usage: "/bookshelves reloadconfig"
-    description: "Reloads the plugin config file."
-    permission: bookshelves.admin
+  "bookshelves":
+    description: "bookshelves plugin commands."
 permissions:
   bookshelves.*:
     description: "Grants all plugin abilities."
@@ -26,5 +24,5 @@ permissions:
     description: "Grants the ability to reload the plugin's config."
     default: false
   bookshelves.player:
-    description: "Grants the ability to interact with bookshelves."
+    description: "Grants the ability to interact with bookshelves and view a list of gui templates."
     default: true
