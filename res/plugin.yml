@@ -3,7 +3,7 @@ name: Bookshelves
 version: 1.0
 api-version: 1.14
 description: >
-  Remotely view books inside bookshelves! Simply attach an item
+  Remotely view books inside of bookshelves! Simply attach an item
   frame or a container with your books.
 website: null
 authors:
