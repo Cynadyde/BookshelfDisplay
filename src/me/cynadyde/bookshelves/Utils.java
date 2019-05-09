@@ -105,7 +105,7 @@ class Utils {
     public static boolean containersSimilar(@NotNull Container a, @NotNull Container b) {
 
         int sizeA = a.getInventory().getSize();
-        int sizeB = a.getInventory().getSize();
+        int sizeB = b.getInventory().getSize();
         if (sizeA != sizeB) {
             return false;
         }
