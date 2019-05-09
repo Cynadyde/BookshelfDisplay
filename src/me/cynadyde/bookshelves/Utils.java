@@ -3,8 +3,6 @@ package me.cynadyde.bookshelves;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,12 +17,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -46,19 +42,13 @@ class Utils {
         ItemStack old = player.getInventory().getItem(slot);
 
         try {
-            ByteBuf buffer = Unpooled.buffer(256);
-            buffer.setByte(0, (byte) 0);
-            buffer.writerIndex(1);
-
             PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
-
             player.getInventory().setItem(slot, book);
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
         }
         catch (Exception ex) {
 
-            Bukkit.getLogger().warning(String.format("Unable to open book for %s: %s\n%s\n%s",
-                    player.getName(), ex, ex.getCause(), Arrays.toString(ex.getStackTrace())));
+            Bukkit.getLogger().warning(String.format("Unable to open book for %s: %s", player.getName(), ex));
         }
 
         player.getInventory().setItem(slot, old);
@@ -112,8 +102,6 @@ class Utils {
      * */
     public static @Nullable Container getAttachedContainer(@Nullable Block block) {
 
-        Bukkit.getLogger().info(Utils.format("\n\nGETTING ATTACHED CONTAINER...\n\n"));
-
         if (block == null) {
             return null;
         }
@@ -127,8 +115,6 @@ class Utils {
             Block relBlock = block.getRelative(direction);
             Container blockContainer = Utils.getContainer(relBlock);
 
-            Bukkit.getLogger().info(Utils.format("relative block %s is %s", direction, relBlock.getType()));
-
             if (blockContainer != null) {
                 return blockContainer;
             }
@@ -138,8 +124,6 @@ class Utils {
                 // Get the first item-frame attached to the block...
                 if ((entity instanceof ItemFrame)) {
                     ItemFrame itemFrame = (ItemFrame) entity;
-
-                    Bukkit.getLogger().info(Utils.format("item frame is facing %s", itemFrame.getAttachedFace()));
 
                     if (itemFrame.getAttachedFace().getOppositeFace().equals(direction)) {
 

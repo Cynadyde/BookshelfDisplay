@@ -1,10 +1,10 @@
 main: me.cynadyde.bookshelves.BookShelvesPlugin
 name: BookShelves
-version: 0.0.4
+version: 1.0
 api-version: 1.14
 description: >
   Remotely view books through bookshelves! Simply attach an item
-  frame with either a book or a container of books to the bookshelf.
+  frame or a container to the bookshelf.
 website: null
 authors:
   - Cynadyde (May 2019)

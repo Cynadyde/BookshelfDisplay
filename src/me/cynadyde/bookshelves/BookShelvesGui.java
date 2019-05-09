@@ -1,6 +1,7 @@
 package me.cynadyde.bookshelves;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -81,13 +82,20 @@ public class BookShelvesGui {
     /**
      * Opens the gui for a bookshelf with the given player.
      */
-    public static void openGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player player) {
-        BookShelvesGui gui = new BookShelvesGui(bookshelf, player);
+    public static void openGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player player, List<Container> path) {
+        BookShelvesGui gui = new BookShelvesGui(bookshelf, player, path);
         player.openInventory(gui.getInventory());
         activeGUIs.add(gui);
 
         // OPEN BOOKSHELF SFX...
         gui.owner.playSound(gui.owner.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
+    }
+
+    /**
+     * Opens the gui for a bookshelf with the given player.
+     */
+    public static void openGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player player) {
+        openGui(bookshelf, player, new ArrayList<>());
     }
 
     /**
@@ -111,15 +119,15 @@ public class BookShelvesGui {
     private Player owner;
     private Inventory inventory;
     private List<Container> path;
+    private boolean interactive;
 
-    private BookShelvesGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player owner) {
+    private BookShelvesGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player owner, @NotNull List<Container> path) {
 
         this.owner = owner;
         this.bookshelf = bookshelf;
-        this.path = new ArrayList<>();
-        this.inventory = Bukkit.createInventory(owner, (9 * 5), bookshelf.getName());
-
-        path.add(bookshelf.getRoot());
+        this.path = path;
+        this.inventory = Bukkit.createInventory(owner, (9 * 5), "BookShelf");
+        this.interactive = true;
 
         updateDisplay();
     }
@@ -141,60 +149,69 @@ public class BookShelvesGui {
         return Collections.unmodifiableList(path);
     }
 
+    /**
+     * Player clicks the inventory gui to read books or change directories.
+     */
     public void onInteract(@Nullable Inventory inv, int slot, @NotNull ClickType click, @NotNull ItemStack cursor) {
 
         // Inside the inventory gui...
-        if (inventory.equals(inv)) {
+        if (!inventory.equals(inv)) {
+            return;
+        }
 
-            // Left click with an empty cursor...
-            if (click.isLeftClick() && cursor.getType().equals(Material.AIR)) {
+        // Left click with an empty cursor...
+        if (interactive && click.isLeftClick() && cursor.getType().equals(Material.AIR)) {
 
-                ItemStack clicked = inventory.getItem(slot);
-                if (clicked != null) {
+            ItemStack clicked = inventory.getItem(slot);
+            if (clicked != null) {
 
-                    // If the item is a book, close the Gui and open the book...
-                    if (clicked.getType().equals(Material.WRITTEN_BOOK)) {
+                // If the item is a book, close the Gui and open the book...
+                if (clicked.getType().equals(Material.WRITTEN_BOOK)) {
 
-                        // OPEN BOOK SFX...
-                        owner.playSound(owner.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
+                    // OPEN BOOK SFX...
+                    owner.playSound(owner.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
 
+                    owner.closeInventory();
+                    Utils.openBook(owner, clicked);
+                    waitForBookPutAway(owner.getLocation().clone());
+                }
+                // If the item is the trim item, go up a directory...
+                else if (clicked.equals(trimItem)) {
 
-                        owner.closeInventory();
-                        Utils.openBook(owner, clicked);
+                    if (path.size() > 1) {
+                        path.remove(path.size() - 1);
+                        animateDirectoryChange();
+
+                        // UP DIRECTORY SFX...
+                        owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
                     }
-                    // If the item is the trim item, go up a directory...
-                    else if (clicked.equals(trimItem)) {
-                        Bukkit.getLogger().info(Utils.format("Trying to go up a directory..."));
+                }
+                // If the item is a container, go into that directory...
+                else {
+                    Container container = Utils.getContainer(clicked);
+                    if (container != null) {
+                        path.add(container);
+                        animateDirectoryChange();
 
-                        if (path.size() > 1) {
-                            path.remove(path.size() - 1);
-                            animateDirectoryChange();
-
-                            // UP DIRECTORY SFX...
-                            owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
-                        }
-                    }
-                    // If the item is a container, go into that directory...
-                    else {
-                        Container container = Utils.getContainer(clicked);
-                        if (container != null) {
-                            path.add(container);
-                            animateDirectoryChange();
-
-                            // DOWN DIRECTORY SFX...
-                            owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
-                        }
+                        // DOWN DIRECTORY SFX...
+                        owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
                     }
                 }
             }
         }
     }
 
+    /**
+     * Set the contents seen in the inventory gui.
+     */
     public void updateDisplay() {
 
-        Bukkit.getLogger().info(Utils.format("Updating display..."));
+        if (path.isEmpty()) {
+            path.add(bookshelf.getRoot());
+        }
 
         ItemStack[] contents = path.get(path.size() - 1).getInventory().getStorageContents();
+
         int ii = 0;
         for (int i = 0; i < 9; i++) {
             inventory.setItem(ii, trimItem);
@@ -214,7 +231,10 @@ public class BookShelvesGui {
         owner.updateInventory();
     }
 
-    public void animateDirectoryChange() {
+    /**
+     * Create a transitioning effect in the inventory gui.
+     */
+    private void animateDirectoryChange() {
 
         // Get a reference to the plugin...
         Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
@@ -222,6 +242,8 @@ public class BookShelvesGui {
             updateDisplay();
             return;
         }
+        interactive = false;
+
         // Fill the inventory with trim momentarily...
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, trimItem);
@@ -232,7 +254,30 @@ public class BookShelvesGui {
         new BukkitRunnable() {
             @Override public void run() {
                 updateDisplay();
+                interactive = true;
             }
         }.runTaskLater(plugin, 10L);
+    }
+
+    /**
+     * Wait for the player to move to open the gui again.
+     */
+    private void waitForBookPutAway(Location loc) {
+
+        // Get a reference to the plugin...
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
+        if (plugin == null) {
+            return;
+        }
+        // Open the Gui again when the player moves at all...
+        new BukkitRunnable() {
+            @Override public void run() {
+
+                if (!owner.getLocation().equals(loc)) {
+                    openGui(bookshelf, owner, path);
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 5L, 5L);
     }
 }

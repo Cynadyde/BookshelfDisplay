@@ -1,13 +1,14 @@
 package me.cynadyde.bookshelves;
 
 import org.bukkit.Material;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * A functional bookshelf with a view of its content.
- * */
+ */
 @SuppressWarnings({ "WeakerAccess", "unused" })
 public class BookShelvesContainer {
 
@@ -40,13 +41,5 @@ public class BookShelvesContainer {
 
     public @NotNull Container getRoot() {
         return root;
-    }
-
-    public @NotNull String getName() {
-        String name = root.getCustomName();
-        if (name == null) {
-            name = "Bookshelf";
-        }
-        return name;
     }
 }
