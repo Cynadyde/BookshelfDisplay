@@ -20,10 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({ "WeakerAccess" })
 class Utils {
 
     /**
@@ -94,12 +91,32 @@ class Utils {
         if (!(itemState instanceof Container)) {
             return null;
         }
-        return (Container) itemState;
+        // Set the container's custom name if possible...
+        Container container = (Container) itemState;
+        if (itemMeta.hasDisplayName()) {
+            container.setCustomName(itemMeta.getDisplayName());
+        }
+        return container;
+    }
+
+    /**
+     * Determine if two containers have the same size and custom name.
+     */
+    public static boolean containersSimilar(Container a, Container b) {
+
+        int sizeA = a.getInventory().getSize();
+        int sizeB = a.getInventory().getSize();
+        if (sizeA != sizeB) {
+            return false;
+        }
+        String nameA = a.getCustomName() != null ? a.getCustomName() : "";
+        String nameB = b.getCustomName() != null ? b.getCustomName() : "";
+        return nameA.equals(nameB);
     }
 
     /**
      * Finds a container attached to the block either as an adjacent block or a container in an adjacent item-frame.
-     * */
+     */
     public static @Nullable Container getAttachedContainer(@Nullable Block block) {
 
         if (block == null) {
@@ -108,7 +125,7 @@ class Utils {
         // Look in all six directions from the block...
         World world = block.getWorld();
 
-        for (BlockFace direction : new BlockFace[] {
+        for (BlockFace direction : new BlockFace[]{
                 BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
         }) {
             // If the adjacent block is a container, use it...
@@ -131,6 +148,12 @@ class Utils {
                         ItemStack item = itemFrame.getItem();
                         Container itemContainer = Utils.getContainer(item);
                         if (itemContainer != null) {
+
+                            // Set the custom name of the container if possible...
+                            ItemMeta itemMeta = item.getItemMeta();
+                            if (itemMeta != null && itemMeta.hasDisplayName()) {
+                                itemContainer.setCustomName(itemMeta.getDisplayName());
+                            }
                             return itemContainer;
                         }
                     }
@@ -138,33 +161,5 @@ class Utils {
             }
         }
         return null;
-    }
-
-    /**
-     * Recursively gets each item at the list and at each nested container.
-     * */
-    public static List<ItemStack> collectItems(ItemStack[] items) {
-
-        List<ItemStack> results = new ArrayList<>();
-
-        for (ItemStack item : items) {
-
-            // Add all items, including air and other containers...
-            if (item == null) {
-                results.add(new ItemStack(Material.AIR, 1));
-                continue;
-            }
-            results.add(item);
-
-            // If it is a container item...
-            Container container = getContainer(item);
-            if (container == null) {
-                continue;
-            }
-
-            // Recursively add all its contents to the results...
-            results.addAll(collectItems(container.getInventory().getContents()));
-        }
-        return results;
     }
 }

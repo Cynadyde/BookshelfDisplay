@@ -15,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * Main class of the BookShelves plugin.
  */
-@SuppressWarnings({ "WeakerAccess", "unused" })
+@SuppressWarnings({ "WeakerAccess" })
 public class BookShelvesPlugin extends JavaPlugin implements Listener {
 
     @Override

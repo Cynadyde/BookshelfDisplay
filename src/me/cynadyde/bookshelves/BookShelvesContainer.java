@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A functional bookshelf with a view of its content.
  */
-@SuppressWarnings({ "WeakerAccess", "unused" })
+@SuppressWarnings({ "WeakerAccess" })
 public class BookShelvesContainer {
 
     /**
