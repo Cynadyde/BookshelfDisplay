@@ -3,7 +3,6 @@ package me.cynadyde.bookshelves;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.utility.MinecraftReflection;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.bukkit.Bukkit;
@@ -15,12 +14,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,10 +50,7 @@ class Utils {
             buffer.setByte(0, (byte) 0);
             buffer.writerIndex(1);
 
-            PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
-            packet.getModifier().writeDefaults();
-            packet.getModifier().write(1, MinecraftReflection.getPacketDataSerializer(buffer));
-            packet.getStrings().write(0, "MC|BOpen");
+            PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
 
             player.getInventory().setItem(slot, book);
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
@@ -116,30 +112,36 @@ class Utils {
      * */
     public static @Nullable Container getAttachedContainer(@Nullable Block block) {
 
+        Bukkit.getLogger().info(Utils.format("\n\nGETTING ATTACHED CONTAINER...\n\n"));
+
         if (block == null) {
             return null;
         }
         // Look in all six directions from the block...
         World world = block.getWorld();
+
         for (BlockFace direction : new BlockFace[] {
                 BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
         }) {
-            // If the adjacent block is a container, return it...
+            // If the adjacent block is a container, use it...
             Block relBlock = block.getRelative(direction);
             Container blockContainer = Utils.getContainer(relBlock);
+
+            Bukkit.getLogger().info(Utils.format("relative block %s is %s", direction, relBlock.getType()));
+
             if (blockContainer != null) {
                 return blockContainer;
             }
             // Look through any entities in each adjacent block...
-            for (Entity entity : (world.getNearbyEntities(relBlock.getBoundingBox()))) {
+            for (Entity entity : (world.getNearbyEntities(relBlock.getLocation().add(0.5f, 0.5f, 0.5f), 0.5f, 0.5f, 0.5f))) {
 
                 // Get the first item-frame attached to the block...
-                if (entity.getType().equals(EntityType.ITEM_FRAME)) {
+                if ((entity instanceof ItemFrame)) {
                     ItemFrame itemFrame = (ItemFrame) entity;
 
-                    Bukkit.getLogger().info(Utils.format("found item frame attached to bookshelf!"));
+                    Bukkit.getLogger().info(Utils.format("item frame is facing %s", itemFrame.getAttachedFace()));
 
-                    if (itemFrame.getFacing().equals(direction.getOppositeFace())) {
+                    if (itemFrame.getAttachedFace().getOppositeFace().equals(direction)) {
 
                         // If the contained item is a container, return it...
                         ItemStack item = itemFrame.getItem();

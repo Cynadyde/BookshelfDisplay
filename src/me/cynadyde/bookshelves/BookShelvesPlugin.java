@@ -91,7 +91,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
         }
 
         // Have the gui handle the event...
-        gui.onInteract(event.getWhoClicked(), event.getInventory(), event.getSlot(), event.getClick(), cursor);
+        gui.onInteract(event.getInventory(), event.getSlot(), event.getClick(), cursor);
     }
 
     /**
