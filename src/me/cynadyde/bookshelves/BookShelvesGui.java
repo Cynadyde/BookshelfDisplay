@@ -357,7 +357,7 @@ public class BookShelvesGui {
     /**
      * Wait for the player to move to open the gui again.
      */
-    private void waitForBookPutAway(Location loc) {
+    private void waitForBookPutAway(@NotNull Location loc) {
 
         // Get a reference to the plugin...
         Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
