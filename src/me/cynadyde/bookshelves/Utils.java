@@ -102,7 +102,7 @@ class Utils {
     /**
      * Determine if two containers have the same size and custom name.
      */
-    public static boolean containersSimilar(Container a, Container b) {
+    public static boolean containersSimilar(@NotNull Container a, @NotNull Container b) {
 
         int sizeA = a.getInventory().getSize();
         int sizeB = a.getInventory().getSize();
