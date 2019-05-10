@@ -91,8 +91,7 @@ public class BookShelvesGui {
         player.openInventory(gui.getInventory());
         activeGUIs.add(gui);
 
-        // OPEN BOOKSHELF SFX...
-        gui.owner.playSound(gui.owner.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
+        playGuiOpenSfx(gui.owner);
 
         return gui;
     }
@@ -116,15 +115,36 @@ public class BookShelvesGui {
             gui.inventory.clear();
             activeGUIs.remove(gui);
 
-            // CLOSE BOOKSHELF SFX...
-            gui.owner.playSound(gui.owner.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
+            playGuiCloseSfx(gui.owner);
         }
+    }
+
+    public static void playGuiOpenSfx(Player player) {
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
+    }
+
+    public static void playGuiCloseSfx(Player player) {
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
+    }
+
+    public static void playDirOpenSfx(Player player) {
+        player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
+    }
+
+    public static void playDirCloseSfx(Player player) {
+        player.playSound(player.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
+    }
+
+    public static void playBookReadSfx(Player player) {
+        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
     }
 
     private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
     private static ItemStack fillItem = Utils.itemStack(1, Material.GRAY_STAINED_GLASS_PANE, " ");
-    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, Utils.format("&4&lPrevious Shelf"));
-    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.GREEN_STAINED_GLASS_PANE, Utils.format("&2&lNext Shelf"));
+    private static ItemStack prevBtnBgItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, " ");
+    private static ItemStack nextBtnBgItem = Utils.itemStack(1, Material.GREEN_STAINED_GLASS_PANE, " ");
+    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&c&lPrevious Shelf"));
+    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&a&lNext Shelf"));
 
     private BookShelvesContainer bookshelf;
     private Player owner;
@@ -188,8 +208,7 @@ public class BookShelvesGui {
                 // If the item is a book, close the Gui and open the book...
                 if (clicked.getType().equals(Material.WRITTEN_BOOK)) {
 
-                    // OPEN BOOK SFX...
-                    owner.playSound(owner.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
+                    playBookReadSfx(owner);
 
                     owner.closeInventory();
                     Utils.openBook(owner, clicked);
@@ -223,8 +242,7 @@ public class BookShelvesGui {
                             animateDirectoryChangeNewInv();
                         }
 
-                        // UP DIRECTORY SFX...
-                        owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
+                        playDirCloseSfx(owner);
                     }
                 }
                 // If the item is a container, go into that directory...
@@ -243,8 +261,7 @@ public class BookShelvesGui {
                             animateDirectoryChangeNewInv();
                         }
 
-                        // DOWN DIRECTORY SFX...
-                        owner.playSound(owner.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
+                        playDirOpenSfx(owner);
                     }
                 }
             }
@@ -280,7 +297,7 @@ public class BookShelvesGui {
             ii++;
         }
         // Set the prev-button item....
-        inventory.setItem(ii++, (start > 0) ? prevBtnItem : trimItem);
+        inventory.setItem(ii++, (start > 0) ? prevBtnItem : prevBtnBgItem);
 
         // Set the bottom trim...
         for (int i = 1; i < 8; i++) {
@@ -288,7 +305,7 @@ public class BookShelvesGui {
             ii++;
         }
         // set the next-button item...
-        inventory.setItem(ii, (start < contents.length - 1 - 27) ? nextBtnItem : trimItem);
+        inventory.setItem(ii, (start < contents.length - 1 - 27) ? nextBtnItem : nextBtnBgItem);
 
         owner.updateInventory();
     }
