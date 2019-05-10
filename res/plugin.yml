@@ -3,8 +3,8 @@ name: BookShelves
 version: 1.14-0
 api-version: 1.14
 description: >
-  Remotely view books inside of bookshelves! Simply attach an item
-  frame or a container with your books.
+  View galleries of books inside of bookshelves! Simply attach an item
+  frame or container with your books.
 website: https://www.spigotmc.org/resources/bookshelves.67225/
 authors:
   - Cynadyde (May 2019)
