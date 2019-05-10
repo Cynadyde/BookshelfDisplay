@@ -1,7 +1,7 @@
 # BookShelves
 
 BookShelves is a Spigot MC Plugin that lets the player use bookshelves to display galleries of books.
-Visit this plugin's [Spigot MC](https://www.spigotmc.org/resources/bookshelves.67225/) page for more information.
+Visit this plugin's [SpigotMC Page](https://www.spigotmc.org/resources/bookshelves.67225/) for more information.
 
 To install, simply place the jar file in your server's `plugins` folder. You will need a single dependency, 
 [ProtocolLib 4.5](https://www.spigotmc.org/resources/protocollib.1997/). (This plugin will not work with ProtocolLib 
