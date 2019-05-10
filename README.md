@@ -12,9 +12,8 @@ version 4.4!) Place this jar in your `plugins` folder, also.
 ##### For Minecraft 1.14:
 > [BookShelves_1.14-0.jar](https://github.com/Cynadyde/BookShelves/raw/master/builds/BookShelves_1.14-0.jar)
 
-
 ## Bugs & Feedback
 
 If you find a bug or would like to give feedback and suggestions, please visit
-the plugin's [Discussion Thread](https://www.spigotmc.org/threads/book-lecterns.219720/).
-You may also use the [Issue Tracker](https://github.com/Cynadyde/BookLecterns/issues).
+the plugin's [Discussion Thread](https://www.spigotmc.org/threads/bookshelves.372139/).
+You may also use the [Issue Tracker](https://github.com/Cynadyde/BookShelves/issues).
