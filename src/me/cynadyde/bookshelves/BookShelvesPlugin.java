@@ -1,6 +1,8 @@
 package me.cynadyde.bookshelves;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -63,6 +65,13 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
         }
         // Cancel the interaction event...
         event.setCancelled(true);
+
+        // Create particle effect...
+        Location particleLoc = event.getClickedBlock().getLocation()
+                .add(0.5f, 0.5f, 0.5f).add(event.getBlockFace().getDirection().multiply(0.3));
+
+        Object particleData = Material.BOOKSHELF.createBlockData();
+        event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
 
         // Open the bookshelf gui for the player...
         BookShelvesGui.openGui(bookShelf, event.getPlayer());
