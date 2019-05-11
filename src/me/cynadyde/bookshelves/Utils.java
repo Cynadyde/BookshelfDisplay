@@ -102,16 +102,12 @@ class Utils {
     /**
      * Determine if two containers have the same size and custom name.
      */
-    public static boolean containersSimilar(@NotNull Container a, @NotNull Container b) {
+    public static boolean containerNamesEqual(@NotNull Container containerA, @NotNull Container containerB) {
 
-        int sizeA = a.getInventory().getSize();
-        int sizeB = b.getInventory().getSize();
-        if (sizeA != sizeB) {
-            return false;
-        }
-        String nameA = a.getCustomName() != null ? a.getCustomName() : "";
-        String nameB = b.getCustomName() != null ? b.getCustomName() : "";
-        return nameA.equals(nameB);
+        String a = containerA.getCustomName();
+        String b = containerB.getCustomName();
+
+        return (a == null && b == null) || (a != null && b != null && a.equals(b));
     }
 
     /**

@@ -141,10 +141,10 @@ public class BookShelvesGui {
 
     private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
     private static ItemStack fillItem = Utils.itemStack(1, Material.GRAY_STAINED_GLASS_PANE, " ");
-    private static ItemStack prevBtnBgItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, " ");
-    private static ItemStack nextBtnBgItem = Utils.itemStack(1, Material.GREEN_STAINED_GLASS_PANE, " ");
-    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&c&lPrevious Shelf"));
-    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.ITEM_FRAME, Utils.format("&a&lNext Shelf"));
+    private static ItemStack prevBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
+    private static ItemStack nextBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
+    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, Utils.format("&c&lPrevious Shelf"));
+    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.LIME_STAINED_GLASS_PANE, Utils.format("&a&lNext Shelf"));
 
     private BookShelvesContainer bookshelf;
     private Player owner;
@@ -234,7 +234,7 @@ public class BookShelvesGui {
                         Container lastDir = path.remove(path.size() - 1).dir;
                         Container curDir = path.get(path.size() - 1).dir;
 
-                        if (Utils.containersSimilar(lastDir, curDir)) {
+                        if (Utils.containerNamesEqual(lastDir, curDir)) {
 
                             animateDirectoryChange();
                         }
@@ -253,7 +253,7 @@ public class BookShelvesGui {
                         Container lastDir = path.get(path.size() - 1).dir;
                         path.add(new PathIndex(container, 0));
 
-                        if (Utils.containersSimilar(lastDir, container)) {
+                        if (Utils.containerNamesEqual(lastDir, container)) {
 
                             animateDirectoryChange();
                         }
