@@ -212,7 +212,10 @@ public class BookShelvesGui {
 
                     owner.closeInventory();
                     Utils.openBook(owner, clicked);
-                    waitForBookPutAway(owner.getLocation().clone());
+
+                    // Add config option for this in the next build.
+                    // I personally think its annoying.
+                    // waitForBookPutAway(owner.getLocation().clone());
                 }
                 // If the item is the prev-button item, go back a page...
                 else if (clicked.equals(prevBtnItem)) {
@@ -374,6 +377,7 @@ public class BookShelvesGui {
     /**
      * Wait for the player to move to open the gui again.
      */
+    @SuppressWarnings({ "unused" })
     private void waitForBookPutAway(@NotNull Location loc) {
 
         // Get a reference to the plugin...
@@ -389,7 +393,7 @@ public class BookShelvesGui {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(plugin, 5L, 5L);
+        }.runTaskTimer(plugin, 1L, 1L);
     }
 
     /**
