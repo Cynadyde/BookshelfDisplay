@@ -1,9 +1,6 @@
 package me.cynadyde.bookshelfdisplay;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
@@ -120,23 +117,49 @@ public class BookshelfDisplayGui {
     }
 
     public static void playGuiOpenSfx(@NotNull Player player) {
-        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
+        if (Utils.RELEASE >= 14) {
+            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 2.0f, 1.50f);
+        }
     }
 
     public static void playGuiCloseSfx(@NotNull Player player) {
-        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
+        if (Utils.RELEASE >= 14) {
+            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 2.0f, 1.25f);
+        }
     }
 
     public static void playDirOpenSfx(@NotNull Player player) {
-        player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
+        if (Utils.RELEASE >= 14) {
+
+            player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_PLACE, 0.5f, 0.75f);
+        }
     }
 
     public static void playDirCloseSfx(@NotNull Player player) {
-        player.playSound(player.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
+        if (Utils.RELEASE >= 14) {
+            player.playSound(player.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_BREAK, 0.5f, 0.75f);
+        }
     }
 
     public static void playBookReadSfx(@NotNull Player player) {
-        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
+        if (Utils.RELEASE >= 14) {
+            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.5f, 0.67f);
+        }
     }
 
     private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -165,7 +188,8 @@ public class BookshelfDisplayGui {
             path.add(new PathIndex(bookshelf.getRoot(), 0));
         }
         // Get the path name for the inventory...
-        String name = path.get(path.size() - 1).dir.getCustomName();
+        Container dir = path.get(path.size() - 1).dir;
+        String name = (dir instanceof Nameable) ? ((Nameable) dir).getCustomName() : null;
         if (name == null) {
             name = "Bookshelf";
         }

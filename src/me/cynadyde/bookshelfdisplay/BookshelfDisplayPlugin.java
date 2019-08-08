@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 /**
  * Main class of the BookshelfDisplay plugin.
@@ -66,8 +67,13 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         event.setCancelled(true);
 
         // Create particle effect...
+        Vector blockFaceVec = new Vector(
+                event.getBlockFace().getModX(),
+                event.getBlockFace().getModY(),
+                event.getBlockFace().getModZ()
+        );
         Location particleLoc = event.getClickedBlock().getLocation()
-                .add(0.5f, 0.5f, 0.5f).add(event.getBlockFace().getDirection().multiply(0.3));
+                .add(0.5f, 0.5f, 0.5f).add(blockFaceVec.multiply(0.3));
 
         Object particleData = Material.BOOKSHELF.createBlockData();
         event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);

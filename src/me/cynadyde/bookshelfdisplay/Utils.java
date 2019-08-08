@@ -8,14 +8,8 @@ import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
+import org.bukkit.*;
+import org.bukkit.block.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
@@ -33,13 +27,8 @@ import java.util.logging.Level;
 @SuppressWarnings({ "WeakerAccess" })
 public class Utils {
 
-    private static String mcVersion;
-    private static Integer mcRelease;
-
-    static {
-        mcVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        mcRelease = Integer.valueOf(mcVersion.split("_")[1]);
-    }
+    public static final String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+    public static final Integer RELEASE = Integer.valueOf(VERSION.split("_")[1]);
 
     /**
      * Translate ampersands into color codes, then format the string.
@@ -64,18 +53,18 @@ public class Utils {
             ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
             PacketContainer packet;
 
-            if (mcRelease >= 14) {
+            if (RELEASE >= 14) {
 
                 packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
                 player.getInventory().setItem(handSlot, book);
                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
             }
-            else if (mcRelease >= 13) {
+            else if (RELEASE >= 13) {
 
                 packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
                 packet.getModifier().writeDefaults();
 
-                Object key = Class.forName("net.minecraft.server." + mcVersion + ".MinecraftKey")
+                Object key = Class.forName("net.minecraft.server." + VERSION + ".MinecraftKey")
                         .getConstructor(String.class).newInstance("minecraft:book_open");
                 packet.getModifier().write(0, key);
 
@@ -150,7 +139,9 @@ public class Utils {
         // Set the container's custom name if possible...
         Container container = (Container) itemState;
         if (itemMeta.hasDisplayName()) {
-            container.setCustomName(itemMeta.getDisplayName());
+            if (container instanceof Nameable) {
+                ((Nameable) container).setCustomName(itemMeta.getDisplayName());
+            }
         }
         return container;
     }
@@ -160,8 +151,8 @@ public class Utils {
      */
     public static boolean containerNamesEqual(@NotNull Container containerA, @NotNull Container containerB) {
 
-        String a = containerA.getCustomName();
-        String b = containerB.getCustomName();
+        String a = (containerA instanceof Nameable) ? ((Nameable) containerA).getCustomName() : null;
+        String b = (containerB instanceof Nameable) ? ((Nameable) containerB).getCustomName() : null;
 
         return (a == null && b == null) || (a != null && a.equals(b));
     }
@@ -204,7 +195,9 @@ public class Utils {
                             // Set the custom name of the container if possible...
                             ItemMeta itemMeta = item.getItemMeta();
                             if (itemMeta != null && itemMeta.hasDisplayName()) {
-                                itemContainer.setCustomName(itemMeta.getDisplayName());
+                                if (itemContainer instanceof Nameable) {
+                                    ((Nameable) itemContainer).setCustomName(itemMeta.getDisplayName());
+                                }
                             }
                             return itemContainer;
                         }
