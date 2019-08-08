@@ -117,49 +117,23 @@ public class BookshelfDisplayGui {
     }
 
     public static void playGuiOpenSfx(@NotNull Player player) {
-        if (Utils.RELEASE >= 14) {
-            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
-        }
-        else {
             player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_LEATHER, 2.0f, 1.50f);
-        }
     }
 
     public static void playGuiCloseSfx(@NotNull Player player) {
-        if (Utils.RELEASE >= 14) {
-            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
-        }
-        else {
             player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 2.0f, 1.25f);
-        }
     }
 
     public static void playDirOpenSfx(@NotNull Player player) {
-        if (Utils.RELEASE >= 14) {
-
-            player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
-        }
-        else {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_PLACE, 0.5f, 0.75f);
-        }
     }
 
     public static void playDirCloseSfx(@NotNull Player player) {
-        if (Utils.RELEASE >= 14) {
-            player.playSound(player.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
-        }
-        else {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_BREAK, 0.5f, 0.75f);
-        }
     }
 
     public static void playBookReadSfx(@NotNull Player player) {
-        if (Utils.RELEASE >= 14) {
-            player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
-        }
-        else {
             player.playSound(player.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.5f, 0.67f);
-        }
     }
 
     private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -256,10 +230,6 @@ public class BookshelfDisplayGui {
 
                     owner.closeInventory();
                     Utils.openBook(owner, clicked);
-
-                    // Add config option for this in the next build.
-                    // I personally think its annoying.
-                    // waitForBookPutAway(owner.getLocation().clone());
                 }
                 // If the item is the prev-button item, go back a page...
                 else if (clicked.equals(prevBtnItem)) {

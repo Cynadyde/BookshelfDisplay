@@ -100,7 +100,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         }
 
         // Cancel dragging on the gui inventory...
-        if (event.getInventory() == gui.getInventory()) {
+        if (event.getInventory() != null) {
             event.setCancelled(true);
         }
     }
@@ -123,7 +123,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         }
 
         // Cancel clicking on the gui inventory...
-        if (event.getClickedInventory() == gui.getInventory()) {
+        if (event.getClickedInventory() != null) {
             event.setCancelled(true);
         }
 

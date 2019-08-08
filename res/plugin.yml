@@ -1,6 +1,6 @@
 main: me.cynadyde.bookshelfdisplay.BookshelfDisplayPlugin
 name: BookshelfDisplay
-version: "1.13.1-0"
+version: "1.13.1-1"
 api-version: "1.13"
 description: >
   View galleries of books inside of bookshelves! Simply attach an item
