@@ -22,24 +22,24 @@ import java.util.*;
  * Display the contents of a bookshelf to a player through an inventory GUI.
  */
 @SuppressWarnings({ "WeakerAccess" })
-public class BookShelvesGui {
+public class BookshelfDisplayGui {
 
-    private static final Set<BookShelvesGui> activeGUIs = new HashSet<>();
+    private static final Set<BookshelfDisplayGui> activeGUIs = new HashSet<>();
 
     /**
      * Gets a set of all guis that are currently open.
      */
-    public static @NotNull Set<BookShelvesGui> activeGuis() {
+    public static @NotNull Set<BookshelfDisplayGui> activeGuis() {
         return Collections.unmodifiableSet(activeGUIs);
     }
 
     /**
      * Fetches an opened gui with a known inventory.
      */
-    public static @Nullable BookShelvesGui getActiveGui(@Nullable Inventory inventory) {
+    public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Inventory inventory) {
 
         if (inventory != null) {
-            for (BookShelvesGui gui : activeGUIs) {
+            for (BookshelfDisplayGui gui : activeGUIs) {
                 if (gui.getInventory().equals(inventory)) {
                     return gui;
                 }
@@ -52,10 +52,10 @@ public class BookShelvesGui {
      * Fetches an opened gui with a known bookshelf anchor.
      */
     @SuppressWarnings("unused")
-    public static @Nullable BookShelvesGui getActiveGui(@Nullable Block anchor) {
+    public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Block anchor) {
 
         if (anchor != null) {
-            for (BookShelvesGui gui : activeGUIs) {
+            for (BookshelfDisplayGui gui : activeGUIs) {
                 if (gui.getBookshelf().getAnchor().equals(anchor)) {
                     return gui;
                 }
@@ -67,10 +67,10 @@ public class BookShelvesGui {
     /**
      * Fetches an opened gui with a known owner.
      */
-    public static @Nullable BookShelvesGui getActiveGui(@Nullable Player owner) {
+    public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Player owner) {
 
         if (owner != null) {
-            for (BookShelvesGui gui : activeGUIs) {
+            for (BookshelfDisplayGui gui : activeGUIs) {
                 if (gui.getOwner().equals(owner)) {
                     return gui;
                 }
@@ -82,11 +82,11 @@ public class BookShelvesGui {
     /**
      * Opens the gui for a bookshelf with the given player.
      */
-    public static BookShelvesGui openGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player player, @NotNull List<PathIndex> path) {
+    public static BookshelfDisplayGui openGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player player, @NotNull List<PathIndex> path) {
 
         player.closeInventory();
 
-        BookShelvesGui gui = new BookShelvesGui(bookshelf, player, path);
+        BookshelfDisplayGui gui = new BookshelfDisplayGui(bookshelf, player, path);
 
         player.openInventory(gui.getInventory());
         activeGUIs.add(gui);
@@ -100,7 +100,7 @@ public class BookShelvesGui {
      * Opens the gui for a bookshelf with the given player.
      */
     @SuppressWarnings("UnusedReturnValue")
-    public static BookShelvesGui openGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player player) {
+    public static BookshelfDisplayGui openGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player player) {
 
         return openGui(bookshelf, player, new ArrayList<>());
     }
@@ -110,7 +110,7 @@ public class BookShelvesGui {
      */
     public static void onInventoryClose(@NotNull InventoryCloseEvent event) {
 
-        BookShelvesGui gui = getActiveGui(event.getInventory());
+        BookshelfDisplayGui gui = getActiveGui(event.getInventory());
         if (gui != null) {
             gui.inventory.clear();
             activeGUIs.remove(gui);
@@ -146,13 +146,13 @@ public class BookShelvesGui {
     private static ItemStack prevBtnItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, Utils.format("&c&lPrevious Shelf"));
     private static ItemStack nextBtnItem = Utils.itemStack(1, Material.LIME_STAINED_GLASS_PANE, Utils.format("&a&lNext Shelf"));
 
-    private BookShelvesContainer bookshelf;
+    private BookshelfDisplayContainer bookshelf;
     private Player owner;
     private Inventory inventory;
     private List<PathIndex> path;
     private boolean interactive;
 
-    private BookShelvesGui(@NotNull BookShelvesContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
+    private BookshelfDisplayGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
 
         this.owner = owner;
         this.bookshelf = bookshelf;
@@ -172,7 +172,7 @@ public class BookShelvesGui {
         updateDisplay();
     }
 
-    public @NotNull BookShelvesContainer getBookshelf() {
+    public @NotNull BookshelfDisplayContainer getBookshelf() {
         return bookshelf;
     }
 
@@ -350,7 +350,7 @@ public class BookShelvesGui {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
         assert (plugin != null);
 
-        BookShelvesGui gui = new BookShelvesGui(bookshelf, owner, path);
+        BookshelfDisplayGui gui = new BookshelfDisplayGui(bookshelf, owner, path);
 
         gui.interactive = false;
 

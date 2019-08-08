@@ -18,7 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * Main class of the BookShelves plugin.
  */
 @SuppressWarnings({ "WeakerAccess" })
-public class BookShelvesPlugin extends JavaPlugin implements Listener {
+public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
@@ -31,7 +31,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
     public void onDisable() {
 
         // Close out any active guis on plugin disable...
-        for (BookShelvesGui gui : BookShelvesGui.activeGuis()) {
+        for (BookshelfDisplayGui gui : BookshelfDisplayGui.activeGuis()) {
             gui.getOwner().closeInventory();
         }
     }
@@ -59,7 +59,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
             return;
         }
         // The block clicked is a functional bookshelf...
-        BookShelvesContainer bookShelf = BookShelvesContainer.at(event.getClickedBlock());
+        BookshelfDisplayContainer bookShelf = BookshelfDisplayContainer.at(event.getClickedBlock());
         if (bookShelf == null) {
             return;
         }
@@ -74,7 +74,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
         event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
 
         // Open the bookshelf gui for the player...
-        BookShelvesGui.openGui(bookShelf, event.getPlayer());
+        BookshelfDisplayGui.openGui(bookShelf, event.getPlayer());
     }
 
     /**
@@ -87,7 +87,7 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
         if (!(event.getWhoClicked() instanceof Player)) {
             return;
         }
-        BookShelvesGui gui = BookShelvesGui.getActiveGui((Player) event.getWhoClicked());
+        BookshelfDisplayGui gui = BookshelfDisplayGui.getActiveGui((Player) event.getWhoClicked());
         if (gui == null) {
             return;
         }
@@ -109,6 +109,6 @@ public class BookShelvesPlugin extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(InventoryCloseEvent event) {
 
-        BookShelvesGui.onInventoryClose(event);
+        BookshelfDisplayGui.onInventoryClose(event);
     }
 }

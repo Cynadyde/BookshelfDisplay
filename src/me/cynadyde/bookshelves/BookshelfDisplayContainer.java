@@ -10,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
  * A functional bookshelf with a view of its content.
  */
 @SuppressWarnings({ "WeakerAccess" })
-public class BookShelvesContainer {
+public class BookshelfDisplayContainer {
 
     /**
      * Gets the functional bookshelf at a given block if it exists.
      */
-    public @Nullable static BookShelvesContainer at(@Nullable Block block) {
+    public @Nullable static BookshelfDisplayContainer at(@Nullable Block block) {
 
         Container container = Utils.getAttachedContainer(block);
 
@@ -23,13 +23,13 @@ public class BookShelvesContainer {
         if (block == null || !block.getType().equals(Material.BOOKSHELF) || container == null) {
             return null;
         }
-        return new BookShelvesContainer(block, container);
+        return new BookshelfDisplayContainer(block, container);
     }
 
     private Block anchor;
     private Container root;
 
-    public BookShelvesContainer(@NotNull Block block, @NotNull Container container) {
+    public BookshelfDisplayContainer(@NotNull Block block, @NotNull Container container) {
 
         this.anchor = block;
         this.root = container;
