@@ -1,4 +1,4 @@
-package me.cynadyde.bookshelves;
+package me.cynadyde.bookshelfdisplay;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;

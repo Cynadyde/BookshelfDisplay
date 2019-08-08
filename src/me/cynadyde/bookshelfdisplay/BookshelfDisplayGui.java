@@ -1,4 +1,4 @@
-package me.cynadyde.bookshelves;
+package me.cynadyde.bookshelfdisplay;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

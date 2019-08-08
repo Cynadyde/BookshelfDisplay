@@ -1,4 +1,4 @@
-package me.cynadyde.bookshelves;
+package me.cynadyde.bookshelfdisplay;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

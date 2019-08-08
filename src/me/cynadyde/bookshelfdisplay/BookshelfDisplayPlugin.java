@@ -1,4 +1,4 @@
-package me.cynadyde.bookshelves;
+package me.cynadyde.bookshelfdisplay;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -55,7 +55,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
             return;
         }
         // The player has permission to use plugin features...
-        if (!event.getPlayer().hasPermission("bookshelves.*")) {
+        if (!event.getPlayer().hasPermission("bookshelfdisplay.*")) {
             return;
         }
         // The block clicked is a functional bookshelf...
