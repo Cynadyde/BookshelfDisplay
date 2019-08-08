@@ -27,14 +27,14 @@ public class BookshelfDisplayGui {
     private static final Set<BookshelfDisplayGui> activeGUIs = new HashSet<>();
 
     /**
-     * Get a set of all guis that are currently open.
+     * Get a set of all GUIs that are currently open.
      */
     public static @NotNull Set<BookshelfDisplayGui> activeGuis() {
         return Collections.unmodifiableSet(activeGUIs);
     }
 
     /**
-     * Fetch an opened gui with a known inventory.
+     * Fetch an opened GUI with a known inventory.
      */
     public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Inventory inventory) {
 
@@ -106,7 +106,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Handle inventory close events to shut down closed guis.
+     * Handle inventory close events to shut down closed GUIs.
      */
     public static void onInventoryClose(@NotNull InventoryCloseEvent event) {
 
@@ -153,7 +153,7 @@ public class BookshelfDisplayGui {
     private boolean interactive;
 
     /**
-     * Create a representation of the booksehlf's inventory display.
+     * Create a representation of the bookshelf's inventory display.
      */
     private BookshelfDisplayGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
 
