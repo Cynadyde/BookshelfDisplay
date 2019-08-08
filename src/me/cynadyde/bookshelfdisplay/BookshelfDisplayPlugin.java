@@ -116,14 +116,6 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
             return;
         }
 
-        getLogger().info("Captured InventoryClickEvent:");
-        getLogger().info(String.format("  matches inv: %b", event.getClickedInventory() == gui.getInventory()));
-        getLogger().info(String.format("  click: %s", event.getClick()));
-        getLogger().info(String.format("  action: %s", event.getAction()));
-        getLogger().info(String.format("  cursor: %s", event.getCursor()));
-        getLogger().info(String.format("  slot: %d", event.getSlot()));
-        getLogger().info(String.format("  slotType: %s", event.getSlotType()));
-
         // Cancel clicking on the gui inventory...
         if (event.getClickedInventory() == gui.getInventory()) {
             event.setCancelled(true);
