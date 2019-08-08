@@ -112,6 +112,21 @@ public class Utils {
     }
 
     /**
+     * Create an item stack with the given amount, material, sub-id, and name.
+     */
+    public static @NotNull ItemStack itemStack(int amount, @NotNull Material material, int dmg, @Nullable String name) {
+        ItemStack itemStack = new ItemStack(material, amount, (short) dmg);
+        if (name != null) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(name);
+            }
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    /**
      * Get a container for the block if possible, else null.
      */
     public static @Nullable Container getContainer(Block block) {
