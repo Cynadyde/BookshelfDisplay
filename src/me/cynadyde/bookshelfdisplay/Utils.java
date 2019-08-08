@@ -2,7 +2,12 @@ package me.cynadyde.bookshelfdisplay;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,11 +25,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.logging.Level;
+
 /**
  * Utility functions for the BookshelfDisplay plugin.
  */
 @SuppressWarnings({ "WeakerAccess" })
 public class Utils {
+
+    private static String mcVersion;
+    private static Integer mcRelease;
+
+    static {
+        mcVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+        mcRelease = Integer.valueOf(mcVersion.split("_")[1]);
+    }
 
     /**
      * Translate ampersands into color codes, then format the string.
@@ -38,20 +53,58 @@ public class Utils {
      */
     public static void openBook(@NotNull Player player, @NotNull ItemStack book) {
 
-        int slot = player.getInventory().getHeldItemSlot();
-        ItemStack old = player.getInventory().getItem(slot);
+        // ProtocolLib is ultra funky between 1.12, 1.13, and 1.14.
+        // Feels bad, man.
+
+        int handSlot = player.getInventory().getHeldItemSlot();
+        ItemStack heldItem = player.getInventory().getItem(handSlot);
 
         try {
-            PacketContainer packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
-            player.getInventory().setItem(slot, book);
-            ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
+
+            ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
+            PacketContainer packet;
+
+            if (mcRelease >= 14) {
+
+                packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
+                player.getInventory().setItem(handSlot, book);
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
+            }
+            else if (mcRelease >= 13) {
+
+                packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
+                packet.getModifier().writeDefaults();
+
+                Object key = Class.forName("net.minecraft.server." + mcVersion + ".MinecraftKey")
+                        .getConstructor(String.class).newInstance("minecraft:book_open");
+                packet.getModifier().write(0, key);
+
+                byte hand = (byte) EnumWrappers.Hand.MAIN_HAND.ordinal();
+                ByteBuf buffer = Unpooled.buffer(256).setByte(0, hand).writerIndex(1);
+                Object serializer = MinecraftReflection.getPacketDataSerializer(buffer);
+                packet.getModifier().write(1, serializer);
+            }
+            else {
+                packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
+                packet.getModifier().writeDefaults();
+
+                packet.getStrings().write(0, "MC|BOpen");
+
+                byte hand = (byte) EnumWrappers.Hand.MAIN_HAND.ordinal();
+                ByteBuf buffer = Unpooled.buffer(256).setByte(0, hand).writerIndex(1);
+                Object serializer = MinecraftReflection.getPacketDataSerializer(buffer);
+                packet.getModifier().write(1, serializer);
+            }
+
+            player.getInventory().setItem(handSlot, book);
+            protocolManager.sendServerPacket(player, packet);
         }
         catch (Exception ex) {
-
-            Bukkit.getLogger().warning(String.format("Unable to open book for %s: %s", player.getName(), ex));
+            Bukkit.getLogger().log(Level.SEVERE, "Unable to open book for " + player.getName(), ex);
         }
-
-        player.getInventory().setItem(slot, old);
+        finally {
+            player.getInventory().setItem(handSlot, heldItem);
+        }
     }
 
     /**
