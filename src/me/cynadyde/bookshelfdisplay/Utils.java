@@ -34,7 +34,7 @@ public class Utils {
     }
 
     /**
-     * Open the book for the player without giving it to them.
+     * Open the book for a player without letting them have it.
      */
     public static void openBook(@NotNull Player player, @NotNull ItemStack book) {
 
