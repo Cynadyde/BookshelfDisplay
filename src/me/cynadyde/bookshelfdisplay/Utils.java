@@ -20,18 +20,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Utility functions for the BookshelfDisplay plugin.
+ */
 @SuppressWarnings({ "WeakerAccess" })
-class Utils {
+public class Utils {
 
     /**
-     * Translates ampersands into color codes, then formats the string.
+     * Translate ampersands into color codes, then format the string.
      */
     public static @NotNull String format(@NotNull String message, Object... objs) {
         return String.format(ChatColor.translateAlternateColorCodes('&', message), objs);
     }
 
     /**
-     * Opens the book for the player without giving it to them.
+     * Open the book for the player without giving it to them.
      */
     public static void openBook(@NotNull Player player, @NotNull ItemStack book) {
 
@@ -52,7 +55,7 @@ class Utils {
     }
 
     /**
-     * Creates an item stack with the given amount, material, and name.
+     * Create an item stack with the given amount, material, and name.
      */
     public static @NotNull ItemStack itemStack(int amount, @NotNull Material material, @Nullable String name) {
         ItemStack itemStack = new ItemStack(material, amount);
@@ -67,7 +70,7 @@ class Utils {
     }
 
     /**
-     * Gets a container for the block if possible, else null.
+     * Get a container for the block if possible, else null.
      */
     public static @Nullable Container getContainer(Block block) {
 
@@ -79,7 +82,7 @@ class Utils {
     }
 
     /**
-     * Gets a container for the item stack if possible, else null.
+     * Get a container for the item stack if possible, else null.
      */
     public static @Nullable Container getContainer(ItemStack item) {
 
@@ -107,11 +110,11 @@ class Utils {
         String a = containerA.getCustomName();
         String b = containerB.getCustomName();
 
-        return (a == null && b == null) || (a != null && b != null && a.equals(b));
+        return (a == null && b == null) || (a != null && a.equals(b));
     }
 
     /**
-     * Finds a container attached to the block either as an adjacent block or a container in an adjacent item-frame.
+     * Find a container attached to the block either as an adjacent block or a container in an adjacent item-frame.
      */
     public static @Nullable Container getAttachedContainer(@Nullable Block block) {
 
