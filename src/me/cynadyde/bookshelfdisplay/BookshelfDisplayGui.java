@@ -27,14 +27,14 @@ public class BookshelfDisplayGui {
     private static final Set<BookshelfDisplayGui> activeGUIs = new HashSet<>();
 
     /**
-     * Gets a set of all guis that are currently open.
+     * Get a set of all guis that are currently open.
      */
     public static @NotNull Set<BookshelfDisplayGui> activeGuis() {
         return Collections.unmodifiableSet(activeGUIs);
     }
 
     /**
-     * Fetches an opened gui with a known inventory.
+     * Fetch an opened gui with a known inventory.
      */
     public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Inventory inventory) {
 
@@ -49,7 +49,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Fetches an opened gui with a known bookshelf anchor.
+     * Fetch an opened gui with a known bookshelf anchor.
      */
     @SuppressWarnings("unused")
     public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Block anchor) {
@@ -65,7 +65,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Fetches an opened gui with a known owner.
+     * Fetch an opened gui with a known owner.
      */
     public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Player owner) {
 
@@ -80,7 +80,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Opens the gui for a bookshelf with the given player.
+     * Open the gui for a bookshelf with the given player.
      */
     public static BookshelfDisplayGui openGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player player, @NotNull List<PathIndex> path) {
 
@@ -97,7 +97,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Opens the gui for a bookshelf with the given player.
+     * Open the gui for a bookshelf with the given player.
      */
     @SuppressWarnings("UnusedReturnValue")
     public static BookshelfDisplayGui openGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player player) {
@@ -106,7 +106,7 @@ public class BookshelfDisplayGui {
     }
 
     /**
-     * Handles inventory close events to shut down closed guis.
+     * Handle inventory close events to shut down closed guis.
      */
     public static void onInventoryClose(@NotNull InventoryCloseEvent event) {
 
@@ -119,23 +119,23 @@ public class BookshelfDisplayGui {
         }
     }
 
-    public static void playGuiOpenSfx(Player player) {
+    public static void playGuiOpenSfx(@NotNull Player player) {
         player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.50f);
     }
 
-    public static void playGuiCloseSfx(Player player) {
+    public static void playGuiCloseSfx(@NotNull Player player) {
         player.playSound(player.getLocation(), Sound.ITEM_BOOK_PUT, 2.0f, 1.25f);
     }
 
-    public static void playDirOpenSfx(Player player) {
+    public static void playDirOpenSfx(@NotNull Player player) {
         player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 0.5f, 0.75f);
     }
 
-    public static void playDirCloseSfx(Player player) {
+    public static void playDirCloseSfx(@NotNull Player player) {
         player.playSound(player.getLocation(), Sound.BLOCK_BARREL_CLOSE, 0.5f, 0.75f);
     }
 
-    public static void playBookReadSfx(Player player) {
+    public static void playBookReadSfx(@NotNull Player player) {
         player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
     }
 
@@ -152,6 +152,9 @@ public class BookshelfDisplayGui {
     private List<PathIndex> path;
     private boolean interactive;
 
+    /**
+     * Create a representation of the booksehlf's inventory display.
+     */
     private BookshelfDisplayGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
 
         this.owner = owner;
@@ -172,18 +175,30 @@ public class BookshelfDisplayGui {
         updateDisplay();
     }
 
+    /**
+     * Get a representation of the bookshelf container.
+     */
     public @NotNull BookshelfDisplayContainer getBookshelf() {
         return bookshelf;
     }
 
+    /**
+     * Get the player who owns this gui.
+     */
     public @NotNull Player getOwner() {
         return owner;
     }
 
+    /**
+     * Get the inventory represented by this gui.
+     */
     public @NotNull Inventory getInventory() {
         return inventory;
     }
 
+    /**
+     * Get the path of the contents being viewed by the player.
+     */
     @SuppressWarnings("unused")
     public @NotNull List<PathIndex> getPath() {
         return Collections.unmodifiableList(path);
@@ -192,7 +207,7 @@ public class BookshelfDisplayGui {
     /**
      * Player clicks the inventory gui to read books or change directories.
      */
-    public void onInteract(@Nullable Inventory inv, int slot, @NotNull ClickType click, @NotNull ItemStack cursor) {
+    public void onInteract(@Nullable Inventory inv, int slot, @NotNull ClickType click, @Nullable ItemStack cursor) {
 
         // Inside the inventory gui...
         if (!inventory.equals(inv)) {
@@ -200,13 +215,18 @@ public class BookshelfDisplayGui {
         }
 
         // Left click with an empty cursor...
-        if (interactive && click.isLeftClick() && cursor.getType().equals(Material.AIR)) {
+        if (interactive && click.isLeftClick() && (cursor == null || cursor.getType() == Material.AIR)) {
+
+            // Make sure the slot is in bounds...
+            if (!(0 <= slot && slot < inv.getSize())) {
+                return;
+            }
 
             ItemStack clicked = inventory.getItem(slot);
             if (clicked != null) {
 
                 // If the item is a book, close the Gui and open the book...
-                if (clicked.getType().equals(Material.WRITTEN_BOOK)) {
+                if (clicked.getType() == Material.WRITTEN_BOOK) {
 
                     playBookReadSfx(owner);
 
@@ -319,7 +339,7 @@ public class BookshelfDisplayGui {
     private void animateDirectoryChange() {
 
         // Get a reference to the plugin...
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookshelfDisplay");
         assert (plugin != null);
 
         interactive = false;
@@ -342,12 +362,12 @@ public class BookshelfDisplayGui {
 
     /**
      * Create a transitioning effect in the inventory gui with a new inventory.
-     * Has the unfortunate side-effect of resetting the mouse position.
+     * Has the unfortunate side-effect of resetting the mouse position and blinking.
      */
     private void animateDirectoryChangeNewInv() {
 
         // Get a reference to the plugin...
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookshelfDisplay");
         assert (plugin != null);
 
         BookshelfDisplayGui gui = new BookshelfDisplayGui(bookshelf, owner, path);
@@ -381,7 +401,7 @@ public class BookshelfDisplayGui {
     private void waitForBookPutAway(@NotNull Location loc) {
 
         // Get a reference to the plugin...
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookShelves");
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("BookshelfDisplay");
         assert (plugin != null);
 
         // Open the Gui again when the player moves at all...
