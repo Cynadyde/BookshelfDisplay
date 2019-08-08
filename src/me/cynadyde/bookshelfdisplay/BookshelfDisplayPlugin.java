@@ -75,14 +75,9 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         Location particleLoc = event.getClickedBlock().getLocation()
                 .add(0.5f, 0.5f, 0.5f).add(blockFaceVec.multiply(0.3));
 
-        if (Utils.RELEASE >= 13) {
-            Object particleData = Material.BOOKSHELF.createBlockData();
-            event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
-        }
-        else {
-            Object particleData = Material.BOOKSHELF.getData();
-            event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
-        }
+        Object particleData = Material.BOOKSHELF.getData();
+        event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
+
 
         // Open the bookshelf gui for the player...
         BookshelfDisplayGui.openGui(bookShelf, event.getPlayer());

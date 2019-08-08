@@ -27,9 +27,6 @@ import java.util.logging.Level;
 @SuppressWarnings({ "WeakerAccess" })
 public class Utils {
 
-    public static final String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-    public static final Integer RELEASE = Integer.valueOf(VERSION.split("_")[1]);
-
     /**
      * Translate ampersands into color codes, then format the string.
      */
@@ -42,9 +39,6 @@ public class Utils {
      */
     public static void openBook(@NotNull Player player, @NotNull ItemStack book) {
 
-        // ProtocolLib is ultra funky between 1.12, 1.13, and 1.14.
-        // Feels bad, man.
-
         int handSlot = player.getInventory().getHeldItemSlot();
         ItemStack heldItem = player.getInventory().getItem(handSlot);
 
@@ -53,37 +47,15 @@ public class Utils {
             ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
             PacketContainer packet;
 
-            if (RELEASE >= 14) {
+            packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
+            packet.getModifier().writeDefaults();
 
-                packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.OPEN_BOOK);
-                player.getInventory().setItem(handSlot, book);
-                ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet);
-            }
-            else if (RELEASE >= 13) {
+            packet.getStrings().write(0, "MC|BOpen");
 
-                packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
-                packet.getModifier().writeDefaults();
-
-                Object key = Class.forName("net.minecraft.server." + VERSION + ".MinecraftKey")
-                        .getConstructor(String.class).newInstance("minecraft:book_open");
-                packet.getModifier().write(0, key);
-
-                byte hand = (byte) EnumWrappers.Hand.MAIN_HAND.ordinal();
-                ByteBuf buffer = Unpooled.buffer(256).setByte(0, hand).writerIndex(1);
-                Object serializer = MinecraftReflection.getPacketDataSerializer(buffer);
-                packet.getModifier().write(1, serializer);
-            }
-            else {
-                packet = protocolManager.createPacket(PacketType.Play.Server.CUSTOM_PAYLOAD);
-                packet.getModifier().writeDefaults();
-
-                packet.getStrings().write(0, "MC|BOpen");
-
-                byte hand = (byte) EnumWrappers.Hand.MAIN_HAND.ordinal();
-                ByteBuf buffer = Unpooled.buffer(256).setByte(0, hand).writerIndex(1);
-                Object serializer = MinecraftReflection.getPacketDataSerializer(buffer);
-                packet.getModifier().write(1, serializer);
-            }
+            byte hand = (byte) EnumWrappers.Hand.MAIN_HAND.ordinal();
+            ByteBuf buffer = Unpooled.buffer(256).setByte(0, hand).writerIndex(1);
+            Object serializer = MinecraftReflection.getPacketDataSerializer(buffer);
+            packet.getModifier().write(1, serializer);
 
             player.getInventory().setItem(handSlot, book);
             protocolManager.sendServerPacket(player, packet);
@@ -94,21 +66,6 @@ public class Utils {
         finally {
             player.getInventory().setItem(handSlot, heldItem);
         }
-    }
-
-    /**
-     * Create an item stack with the given amount, material, and name.
-     */
-    public static @NotNull ItemStack itemStack(int amount, @NotNull Material material, @Nullable String name) {
-        ItemStack itemStack = new ItemStack(material, amount);
-        if (name != null) {
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(name);
-            }
-            itemStack.setItemMeta(meta);
-        }
-        return itemStack;
     }
 
     /**
