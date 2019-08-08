@@ -10,14 +10,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * Main class of the BookShelves plugin.
+ * Main class of the BookshelfDisplay plugin.
  */
-@SuppressWarnings({ "WeakerAccess" })
 public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
 
     @Override
@@ -37,9 +36,9 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
     }
 
     /**
-     * Open bookshelf GUIs when bookshelf is clicked.
+     * Open bookshelf GUIs when a bookshelf is clicked.
      */
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
 
         // The player has right-clicked...
@@ -54,8 +53,8 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         if (event.getClickedBlock() == null) {
             return;
         }
-        // The player has permission to use plugin features...
-        if (!event.getPlayer().hasPermission("bookshelfdisplay.*")) {
+        // The player has permission to view a bookshelf display...
+        if (!event.getPlayer().hasPermission("bookshelfdisplay.view")) {
             return;
         }
         // The block clicked is a functional bookshelf...
@@ -78,35 +77,66 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
     }
 
     /**
-     * Update bookshelf GUIs when inventory is clicked.
+     * Update bookshelf GUIs when an inventory is clicked.
      */
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onInventoryClick(InventoryClickEvent event) {
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryDrag(InventoryDragEvent event) {
 
-        // The inventory was a bookshelf gui...
+        // The clicker was a player...
         if (!(event.getWhoClicked() instanceof Player)) {
             return;
         }
+
+        // The player is viewing a bookshelf gui...
         BookshelfDisplayGui gui = BookshelfDisplayGui.getActiveGui((Player) event.getWhoClicked());
         if (gui == null) {
             return;
         }
-        // Cancel normal interaction...
-        event.setCancelled(true);
 
-        ItemStack cursor = event.getCursor();
-        if (cursor == null) {
-            cursor = new ItemStack(Material.AIR, 1);
+        // Cancel dragging on the gui inventory...
+        if (event.getInventory() == gui.getInventory()) {
+            event.setCancelled(true);
         }
-
-        // Have the gui handle the event...
-        gui.onInteract(event.getInventory(), event.getSlot(), event.getClick(), cursor);
     }
 
     /**
-     * Close bookshelf GUIs when inventory is closed.
+     * Update bookshelf GUIs when an inventory is clicked.
      */
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+
+        // The clicker was a player...
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+
+        // The player is viewing a bookshelf gui...
+        BookshelfDisplayGui gui = BookshelfDisplayGui.getActiveGui((Player) event.getWhoClicked());
+        if (gui == null) {
+            return;
+        }
+
+        getLogger().info("Captured InventoryClickEvent:");
+        getLogger().info(String.format("  matches inv: %b", event.getClickedInventory() == gui.getInventory()));
+        getLogger().info(String.format("  click: %s", event.getClick()));
+        getLogger().info(String.format("  action: %s", event.getAction()));
+        getLogger().info(String.format("  cursor: %s", event.getCursor()));
+        getLogger().info(String.format("  slot: %d", event.getSlot()));
+        getLogger().info(String.format("  slotType: %s", event.getSlotType()));
+
+        // Cancel clicking on the gui inventory...
+        if (event.getClickedInventory() == gui.getInventory()) {
+            event.setCancelled(true);
+        }
+
+        // Have the gui handle the event...
+        gui.onInteract(event.getClickedInventory(), event.getSlot(), event.getClick(), event.getCursor());
+    }
+
+    /**
+     * Close bookshelf GUIs when an inventory is closed.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClose(InventoryCloseEvent event) {
 
         BookshelfDisplayGui.onInventoryClose(event);
