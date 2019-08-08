@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
@@ -75,7 +76,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         Location particleLoc = event.getClickedBlock().getLocation()
                 .add(0.5f, 0.5f, 0.5f).add(blockFaceVec.multiply(0.3));
 
-        Object particleData = Material.BOOKSHELF.getData();
+        MaterialData particleData = new MaterialData(Material.BOOKSHELF);
         event.getPlayer().getWorld().spawnParticle(Particle.BLOCK_DUST, particleLoc, 6, particleData);
 
 
@@ -101,7 +102,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         }
 
         // Cancel dragging on the gui inventory...
-        if (event.getInventory() == gui.getInventory()) {
+        if (event.getInventory() != null) {
             event.setCancelled(true);
         }
     }
@@ -124,7 +125,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         }
 
         // Cancel clicking on the gui inventory...
-        if (event.getClickedInventory() == gui.getInventory()) {
+        if (event.getClickedInventory() != null) {
             event.setCancelled(true);
         }
 
