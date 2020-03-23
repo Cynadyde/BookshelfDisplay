@@ -117,7 +117,7 @@ public class BookshelfDisplayPlugin extends JavaPlugin implements Listener {
         }
 
         // Cancel clicking on the gui inventory...
-        if (event.getClickedInventory() == gui.getInventory()) {
+        if (event.getInventory() == gui.getInventory()) {
             event.setCancelled(true);
         }
 
