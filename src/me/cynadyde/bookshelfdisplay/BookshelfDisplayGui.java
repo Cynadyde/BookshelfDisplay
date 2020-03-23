@@ -419,7 +419,7 @@ public class BookshelfDisplayGui {
     /**
      * The container and start index for the content of a gui.
      */
-    public class PathIndex {
+    public static class PathIndex {
 
         public @NotNull Container dir;
         public @NotNull Integer start;
