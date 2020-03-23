@@ -9,8 +9,8 @@ you have ProtocolLib 4.5!) Place this jar in your `plugins` folder, also.
 
 ## Downloads
 
-##### For Minecraft 1.14.x:
-> [BookshelfDisplay_v1.14.4-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.14.4-0.jar)
+##### For Minecraft 1.14.x and 1.15.x:
+> [BookshelfDisplay_v1.15.2-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.15.2-0.jar)
 
 ##### For Minecraft 1.13.x:
 > [BookshelfDisplay_v1.13.1-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.13.1-0.jar)
