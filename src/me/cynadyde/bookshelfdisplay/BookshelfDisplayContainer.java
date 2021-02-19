@@ -9,8 +9,18 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A functional bookshelf with a view of its content.
  */
-@SuppressWarnings({ "WeakerAccess" })
 public class BookshelfDisplayContainer {
+
+    private Block anchor;
+    private Container root;
+
+    /**
+     * Create a representation of a bookshelf's container.
+     */
+    public BookshelfDisplayContainer(@NotNull Block block, @NotNull Container container) {
+        this.anchor = block;
+        this.root = container;
+    }
 
     /**
      * Get the functional bookshelf at a given block if it exists.
@@ -24,18 +34,6 @@ public class BookshelfDisplayContainer {
             return null;
         }
         return new BookshelfDisplayContainer(block, container);
-    }
-
-    private Block anchor;
-    private Container root;
-
-    /**
-     * Create a representation of a bookshelf's container.
-     */
-    public BookshelfDisplayContainer(@NotNull Block block, @NotNull Container container) {
-
-        this.anchor = block;
-        this.root = container;
     }
 
     /**

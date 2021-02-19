@@ -1,10 +1,10 @@
 main: me.cynadyde.bookshelfdisplay.BookshelfDisplayPlugin
 name: BookshelfDisplay
-version: "1.15.2-0"
+version: "1.16.4-0"
 api-version: "1.14"
 description: >
-  View galleries of books inside of bookshelves! Simply attach an item
-  frame or container with your desired items.
+  View galleries of books inside of bookshelves! Simply attach a
+  container with your desired items to the side of a bookshelf.
 website: https://www.spigotmc.org/resources/bookshelfdisplay.67225/
 authors:
   - Cynadyde (May 2019)

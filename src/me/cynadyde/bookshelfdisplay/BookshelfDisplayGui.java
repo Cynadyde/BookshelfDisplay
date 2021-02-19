@@ -16,15 +16,54 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Display the contents of a bookshelf to a player through an inventory GUI.
  */
-@SuppressWarnings({ "WeakerAccess" })
 public class BookshelfDisplayGui {
 
     private static final Set<BookshelfDisplayGui> activeGUIs = new HashSet<>();
+
+    private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
+    private static ItemStack fillItem = Utils.itemStack(1, Material.GRAY_STAINED_GLASS_PANE, " ");
+    private static ItemStack prevBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
+    private static ItemStack nextBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
+    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, Utils.format("&c&lPrevious Shelf"));
+    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.LIME_STAINED_GLASS_PANE, Utils.format("&a&lNext Shelf"));
+
+    private BookshelfDisplayContainer bookshelf;
+    private Player owner;
+    private Inventory inventory;
+    private List<PathIndex> path;
+    private boolean interactive;
+
+    /**
+     * Create a representation of the bookshelf's inventory display.
+     */
+    private BookshelfDisplayGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
+
+        this.owner = owner;
+        this.bookshelf = bookshelf;
+        this.path = path;
+
+        if (path.isEmpty()) {
+            path.add(new PathIndex(bookshelf.getRoot(), 0));
+        }
+        // Get the path name for the inventory...
+        String name = path.get(path.size() - 1).dir.getCustomName();
+        if (name == null) {
+            name = "Bookshelf";
+        }
+        this.inventory = Bukkit.createInventory(owner, 45, name);
+        this.interactive = true;
+
+        updateDisplay();
+    }
 
     /**
      * Get a set of all GUIs that are currently open.
@@ -51,7 +90,6 @@ public class BookshelfDisplayGui {
     /**
      * Fetch an opened gui with a known bookshelf anchor.
      */
-    @SuppressWarnings("unused")
     public static @Nullable BookshelfDisplayGui getActiveGui(@Nullable Block anchor) {
 
         if (anchor != null) {
@@ -99,7 +137,6 @@ public class BookshelfDisplayGui {
     /**
      * Open the gui for a bookshelf with the given player.
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static BookshelfDisplayGui openGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player player) {
 
         return openGui(bookshelf, player, new ArrayList<>());
@@ -139,42 +176,6 @@ public class BookshelfDisplayGui {
         player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.5f, 0.67f);
     }
 
-    private static ItemStack trimItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
-    private static ItemStack fillItem = Utils.itemStack(1, Material.GRAY_STAINED_GLASS_PANE, " ");
-    private static ItemStack prevBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
-    private static ItemStack nextBtnBgItem = Utils.itemStack(1, Material.BLACK_STAINED_GLASS_PANE, " ");
-    private static ItemStack prevBtnItem = Utils.itemStack(1, Material.RED_STAINED_GLASS_PANE, Utils.format("&c&lPrevious Shelf"));
-    private static ItemStack nextBtnItem = Utils.itemStack(1, Material.LIME_STAINED_GLASS_PANE, Utils.format("&a&lNext Shelf"));
-
-    private BookshelfDisplayContainer bookshelf;
-    private Player owner;
-    private Inventory inventory;
-    private List<PathIndex> path;
-    private boolean interactive;
-
-    /**
-     * Create a representation of the bookshelf's inventory display.
-     */
-    private BookshelfDisplayGui(@NotNull BookshelfDisplayContainer bookshelf, @NotNull Player owner, @NotNull List<PathIndex> path) {
-
-        this.owner = owner;
-        this.bookshelf = bookshelf;
-        this.path = path;
-
-        if (path.isEmpty()) {
-            path.add(new PathIndex(bookshelf.getRoot(), 0));
-        }
-        // Get the path name for the inventory...
-        String name = path.get(path.size() - 1).dir.getCustomName();
-        if (name == null) {
-            name = "Bookshelf";
-        }
-        this.inventory = Bukkit.createInventory(owner, 45, name);
-        this.interactive = true;
-
-        updateDisplay();
-    }
-
     /**
      * Get a representation of the bookshelf container.
      */
@@ -199,7 +200,6 @@ public class BookshelfDisplayGui {
     /**
      * Get the path of the contents being viewed by the player.
      */
-    @SuppressWarnings("unused")
     public @NotNull List<PathIndex> getPath() {
         return Collections.unmodifiableList(path);
     }
@@ -353,7 +353,8 @@ public class BookshelfDisplayGui {
 
         // Refresh the inventory after a half second...
         new BukkitRunnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 updateDisplay();
                 interactive = true;
             }
@@ -383,7 +384,8 @@ public class BookshelfDisplayGui {
 
         // Refresh the inventory after a half second...
         new BukkitRunnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 gui.updateDisplay();
                 gui.interactive = true;
             }
@@ -397,7 +399,6 @@ public class BookshelfDisplayGui {
     /**
      * Wait for the player to move to open the gui again.
      */
-    @SuppressWarnings({ "unused" })
     private void waitForBookPutAway(@NotNull Location loc) {
 
         // Get a reference to the plugin...
@@ -406,7 +407,8 @@ public class BookshelfDisplayGui {
 
         // Open the Gui again when the player moves at all...
         new BukkitRunnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
 
                 if (!owner.getLocation().equals(loc)) {
                     openGui(bookshelf, owner, path);

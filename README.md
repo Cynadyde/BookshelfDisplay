@@ -1,23 +1,25 @@
 # BookshelfDisplay
 
-BookshelfDisplay is a Spigot MC Plugin that lets the player use bookshelves to display galleries of books.
+BookshelfDisplay is a SpigotMC Plugin that lets the player use bookshelves to display galleries of books.
 Visit this plugin's [SpigotMC Page](https://www.spigotmc.org/resources/bookshelfdisplay.67225/) for more information.
 
 To install, simply place the jar file in your server's `plugins` folder. You will need a single dependency, 
-[ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/). (Make sure that if you are using Minecraft 1.14 
-you have ProtocolLib 4.5!) Place this jar in your `plugins` folder, also.
+[ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/). (Make sure it is the latest version!) 
+Place this jar in your `plugins` folder, also.
 
 ## Downloads
 
-##### For Minecraft 1.14.x and 1.15.x:
-> [BookshelfDisplay_v1.15.2-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.15.2-0.jar)
+###### (only the newest version is maintained)
+
+##### For Minecraft 1.14.x through 1.16.X:
+> [BookshelfDisplay_1.16.4-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_1.16.4-0.jar)
 
 ##### For Minecraft 1.13.x:
-> [BookshelfDisplay_v1.13.1-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.13.1-0.jar)  
+> [BookshelfDisplay_1.13.1-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_1.13.1-0.jar)  
   (out of date and contains bugs)
 
 ##### For Minecraft 1.12.x:
-> [BookshelfDisplay_v1.12.2-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_v1.12.2-0.jar)  
+> [BookshelfDisplay_1.12.2-0.jar](https://github.com/Cynadyde/BookshelfDisplay/raw/master/builds/BookshelfDisplay_1.12.2-0.jar)  
   (out of date and contains bugs)
 
 ## Bugs & Feedback
